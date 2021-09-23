@@ -1,4 +1,5 @@
 import json
+import pandas as pd 
 
 def calc_header_statistics(table_list):
     """
@@ -107,19 +108,6 @@ def cumulative_percentage_value(value_stat):
     cum_percentage = (num_tables_below_n / num_tables) * 100
     print("Cumulative percentage of value up to {} is {}%.".format(n, cum_percentage))
 
-def table_visualize(table_list):
-    """
-    Print the table json object at corresponding index.
-    """
-    
-    tb_num = int(input("Type the index of the table you want to see: "))
-    for i, tb_object in enumerate(table_list):
-        if i>tb_num:
-            break
-        if i==tb_num:
-            tb_object = json.loads(tb_object)
-            for key in tb_object.keys():
-                print("{}: {}".format(key, tb_object[key]))
 
 def interactions_visualize_and_merge(interaction_loc):
     """
@@ -172,7 +160,7 @@ def main():
         tb_list = list(tb_file)
 
     # print("Successfully loaded the table file")
-    # table_visualize(tb_list)
+    # print_table_object(tb_list)
     # header_stat = calc_header_statistics(tb_list)
     # row_stat = calc_row_statistics(tb_list)
     # value_stat = calc_value_statistics(tb_list)

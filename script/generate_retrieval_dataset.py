@@ -36,9 +36,11 @@ def calc_q_intersection_ori_nq_and_table(nq_loc, table_qa_list):
     print("Number of questions in nq-{} dataset:{}".format(nq_loc[-5:], len(original_nq_q_list)))
     print("Number of overlapped question b/w the two: {}".format(len(list(set(table_qa_list) & set(original_nq_q_list)))))
 
-def filter_table_qa_dataset(table_q_list, nq_open_train_loc, nq_open_dev_loc):
+def filter_and_save_table_qa_dataset(table_q_list, nq_open_train_loc, nq_open_dev_loc, merged_interaction_loc):
     """
     Filter table QA dataset that belongs to NQ_open_train, NQ_open_dev only.
+    Return: filtered interaction list with question only.
+    Save: filtered interaction itself.
     """
     print("==== Now filtering table_QA dataset ====")
     print(f"Length before filtering: {len(table_q_list)}")
@@ -58,6 +60,20 @@ def filter_table_qa_dataset(table_q_list, nq_open_train_loc, nq_open_dev_loc):
     filtered_list = list(set(table_q_list) & set(original_nq_open_q_list))
     print(f"Length after filtering: {len(filtered_list)}")
     
+    with open(merged_interaction_loc, 'r') as f:
+        merged_interaction_list = json.load(f)
+    
+    filtered_interaction_list = []
+
+    for it_object in merged_interaction_list:
+        it_object = json.loads(it_object)
+        question = it_object["questions"][0]["originalText"]
+        if question.strip() in filtered_list and question.strip() not in :
+            filtered_interaction_list.append(it_object)
+
+    with open("/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions/filtered_interaction.json", "w+") as f:
+        json.dump(filtered_interaction_list, f)
+    print("Saving of filtered interaction list completed. Length : {}".format(len(filtered_interaction_list)))
     return filtered_list
 
 def extract_q_from_interaction_file_and_save(merged_nq_table_data_loc):
@@ -100,12 +116,15 @@ def calc_intersection(table_q_list, DPR_NQ_train_loc, DPR_NQ_dev_loc, NQ_open_tr
     calc_q_intersection_ori_nq_and_table(NQ_open_dev_loc, table_q_list)
     calc_q_intersection_ori_nq_and_table(NQ_open_test_loc, table_q_list)
 
-def visualize_overlapped_qa_pair(dpr_loc, filtered_table_q_list):
+def visualize_overlapped_qa_pair(dpr_loc, filtered_table_q_list, merged_interaction_loc):
     """
     Print and save overlapped pairs in DPR_NQ data and filtered table_qa_data.
     """
     with open(dpr_loc, 'r') as dpr_file:
         dpr_data = json.load(dpr_file)
+    with open(merged_interaction_loc, 'r') as interaction_file:
+        merged_interaction_data = json.load(interaction_file)
+
     dpr_q_list = []
     for data in dpr_data:
         dpr_q_list.append(data["question"].strip())
@@ -137,9 +156,9 @@ def main():
     original_nq_test_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/qas/nq-test.csv"
 
     table_q_list = extract_q_from_interaction_file_and_save(merged_nq_table_data_loc)
-    filtered_table_q_list = filter_table_qa_dataset(table_q_list, original_nq_train_data_loc, original_nq_dev_data_loc)
+    filtered_table_q_list = filter_and_save_table_qa_dataset(table_q_list, original_nq_train_data_loc, original_nq_dev_data_loc, merged_nq_table_data_loc)
     
-    calc_intersection(filtered_table_q_list, dpr_nq_train_data_loc, dpr_nq_dev_data_loc, original_nq_train_data_loc, original_nq_dev_data_loc, original_nq_test_data_loc)
+    # calc_intersection(filtered_table_q_list, dpr_nq_train_data_loc, dpr_nq_dev_data_loc, original_nq_train_data_loc, original_nq_dev_data_loc, original_nq_test_data_loc)
     
         
 if __name__ == '__main__':
