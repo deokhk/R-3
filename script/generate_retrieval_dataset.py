@@ -57,6 +57,7 @@ def filter_table_qa_dataset(table_q_list, nq_open_train_loc, nq_open_dev_loc):
     
     filtered_list = list(set(table_q_list) & set(original_nq_open_q_list))
     print(f"Length after filtering: {len(filtered_list)}")
+    
     return filtered_list
 
 def extract_q_from_interaction_file_and_save(merged_nq_table_data_loc):
@@ -128,17 +129,18 @@ def visualize_overlapped_qa_pair(dpr_loc, filtered_table_q_list):
         
 
 def main():
-    merged_nq_table_data_loc = "/home/deokhk/research/multiqa/dataset/NQ_tables/interactions/merged_interaction.json"
-    dpr_nq_train_data_loc = "/home/deokhk/research/multiqa/model/DPR/dpr/downloads/data/retriever/nq-train.json"
-    dpr_nq_dev_data_loc = "/home/deokhk/research/multiqa/model/DPR/dpr/downloads/data/retriever/nq-dev.json"
-    original_nq_train_data_loc = "/home/deokhk/research/multiqa/model/DPR/dpr/downloads/data/retriever/qas/nq-train.csv"
-    original_nq_dev_data_loc = "/home/deokhk/research/multiqa/model/DPR/dpr/downloads/data/retriever/qas/nq-dev.csv"
-    original_nq_test_data_loc = "/home/deokhk/research/multiqa/model/DPR/dpr/downloads/data/retriever/qas/nq-test.csv"
+    merged_nq_table_data_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions/merged_interaction.json"
+    dpr_nq_train_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train.json"
+    dpr_nq_dev_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev.json"
+    original_nq_train_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/qas/nq-train.csv"
+    original_nq_dev_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/qas/nq-dev.csv"
+    original_nq_test_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/qas/nq-test.csv"
 
     table_q_list = extract_q_from_interaction_file_and_save(merged_nq_table_data_loc)
     filtered_table_q_list = filter_table_qa_dataset(table_q_list, original_nq_train_data_loc, original_nq_dev_data_loc)
+    
     calc_intersection(filtered_table_q_list, dpr_nq_train_data_loc, dpr_nq_dev_data_loc, original_nq_train_data_loc, original_nq_dev_data_loc, original_nq_test_data_loc)
-
+    
         
 if __name__ == '__main__':
     main()

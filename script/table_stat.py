@@ -166,8 +166,8 @@ def filter_table(table_list):
         json.dump(filtered_table, f)
 
 def main():
-    table_loc = "/home/deokhk/research/multiqa/dataset/NQ_tables/tables/tables.jsonl"
-    interaction_loc = "/home/deokhk/research/multiqa/dataset/NQ_tables/interactions"
+    table_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/tables/tables.jsonl"
+    interaction_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions"
     with open(table_loc, 'r') as tb_file:
         tb_list = list(tb_file)
 
