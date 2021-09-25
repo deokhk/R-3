@@ -68,7 +68,7 @@ def filter_and_save_table_qa_dataset(table_q_list, nq_open_train_loc, nq_open_de
     for it_object in merged_interaction_list:
         it_object = json.loads(it_object)
         question = it_object["questions"][0]["originalText"]
-        if question.strip() in filtered_list and question.strip() not in :
+        if question.strip() in filtered_list:
             filtered_interaction_list.append(it_object)
 
     with open("/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions/filtered_interaction.json", "w+") as f:
@@ -146,6 +146,30 @@ def visualize_overlapped_qa_pair(dpr_loc, filtered_table_q_list, merged_interact
             if i>n:
                 break
         
+def remove_duplicated_qa_pair(dpr_train_loc, dpr_dev_loc, filtered_interaction):
+    with open(dpr_train_loc, 'r') as f:
+        dpr_train = json.load(f)
+    with open(dpr_dev_loc, 'r') as f:
+        dpr_dev = json.load(f)
+    
+    dpr_q = set()
+    for data in dpr_train:
+        dpr_q.add(data["question"].strip())
+    for data in dpr_dev:
+        dpr_q.add(data["question"].strip())
+    
+    duplicated_removed_interaction = []
+    print(f"Number of QA pair before duplication removed: {len(filtered_interaction)}")
+    for it_object in filtered_interaction:
+        q = it_object["questions"][0]["originalText"].strip()
+        if q not in dpr_q:
+            duplicated_removed_interaction.append(it_object)
+    print(f"Number of QA pair after duplication removed: {len(duplicated_removed_interaction)}")
+    with open("/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions/dup_removed_interaction.json", "w+") as f:
+        json.dump(duplicated_removed_interaction, f)
+    print("Saving of duplicated_removed_interaction completed")
+
+    return duplicated_removed_interaction
 
 def main():
     merged_nq_table_data_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions/merged_interaction.json"
@@ -156,10 +180,8 @@ def main():
     original_nq_test_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/qas/nq-test.csv"
 
     table_q_list = extract_q_from_interaction_file_and_save(merged_nq_table_data_loc)
-    filtered_table_q_list = filter_and_save_table_qa_dataset(table_q_list, original_nq_train_data_loc, original_nq_dev_data_loc, merged_nq_table_data_loc)
-    
-    # calc_intersection(filtered_table_q_list, dpr_nq_train_data_loc, dpr_nq_dev_data_loc, original_nq_train_data_loc, original_nq_dev_data_loc, original_nq_test_data_loc)
-    
+    filtered_interaction = filter_and_save_table_qa_dataset(table_q_list, original_nq_train_data_loc, original_nq_dev_data_loc, merged_nq_table_data_loc)
+    dup_removed_interaction = remove_duplicated_qa_pair(dpr_nq_train_data_loc, dpr_nq_dev_data_loc, filtered_interaction)    
         
 if __name__ == '__main__':
     main()
