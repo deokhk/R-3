@@ -14,7 +14,7 @@ def linearize_column(column_list):
         if i != cl-1:
             linearized_column+=" "
     return linearized_column
-# TODO: make sure to remove webhook when this release publicly.
+# TODO: make sure to remove webhook when this releases publicly.
 
 @slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
 def main():    
@@ -77,8 +77,6 @@ def main():
         
             
         count+=1
-        if count == 1000:
-            break
     print(f"Total number of table linearized :{count}")
     print(f"Total passage created : {psg_count-21015325}")
     f.close()
