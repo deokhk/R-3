@@ -18,7 +18,7 @@ def linearize_column(column_list):
 
 @slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
 def main():    
-    tokenizer = BertTokenizerFast.from_pretrained("bert-base-cased", additional_special_tokens = ['[C_SEP]', '[R_SEP]'])
+    tokenizer = BertTokenizerFast.from_pretrained("bert-base-cased", additional_special_tokens = ['[C_SEP]', '[V_SEP]', '[R_SEP]'])
     table_data_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/tables/tables.jsonl"
     with open(table_data_loc, 'r') as table_file:
         table_datas = list(table_file)
@@ -47,11 +47,9 @@ def main():
             for j, value in enumerate(row_value):
                 linearized_value += value["text"] 
                 if j != len(row_value)-1:
-                    linearized_value += "[R_SEP]"
+                    linearized_value += "[V_SEP]"
             if i != len(rows)-1:
-                # Since "\n" is considered as whitespace, we first set delimter for each sentence as "[CLS]"
-                # And replace it to "\n" afterward.
-                linearized_value += "[CLS]"
+                linearized_value += "[R_SEP]"
         linearized_value = tokenizer.tokenize(linearized_value)
         
         # split the linearized value into passages, each with 100 token.
