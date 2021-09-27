@@ -171,7 +171,7 @@ def remove_duplicated_qa_pair(dpr_train_loc, dpr_dev_loc, filtered_interaction):
 
     return duplicated_removed_interaction
 
-
+    
 def main():
     merged_nq_table_data_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions/merged_interaction.json"
     dpr_nq_train_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train.json"
