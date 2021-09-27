@@ -3,6 +3,7 @@ import json
 import csv
 from time import sleep
 from tqdm import tqdm
+from knockknock import slack_sender
 
 
 def linearize_column(column_list):
@@ -13,7 +14,9 @@ def linearize_column(column_list):
         if i != cl-1:
             linearized_column+=" "
     return linearized_column
+# TODO: make sure to remove webhook when this release publicly.
 
+@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
 def main():    
     tokenizer = BertTokenizerFast.from_pretrained("bert-base-cased", additional_special_tokens = ['[C_SEP]', '[R_SEP]'])
     table_data_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/tables/tables.jsonl"
@@ -23,7 +26,7 @@ def main():
     count = 0
     psg_count = 21015325 # Since the last number of wikipedia split is 21015324
 
-    f = open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100.tsv", "wt")
+    f = open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100_sample.tsv", "wt")
     tsv_writer = csv.writer(f, delimiter='\t')
 
     for table in tqdm(table_datas):
@@ -74,7 +77,7 @@ def main():
         
             
         count+=1
-        if count == 2:
+        if count == 1000:
             break
     print(f"Total number of table linearized :{count}")
     print(f"Total passage created : {psg_count-21015325}")
