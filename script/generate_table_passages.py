@@ -26,7 +26,7 @@ def main():
     count = 0
     psg_count = 21015325 # Since the last number of wikipedia split is 21015324
 
-    f = open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100_sample.tsv", "wt")
+    f = open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100.tsv", "wt")
     tsv_writer = csv.writer(f, delimiter='\t')
 
     for table in tqdm(table_datas):
