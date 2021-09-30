@@ -4,6 +4,10 @@ nq_train:
   _target_: dpr.data.biencoder_data.JsonQADataset
   file: data.retriever.nq-train
 
+nq_train_with_table:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: data.retriever.nq-train-with-table
+
 nq_train_hn1:
   _target_: dpr.data.biencoder_data.JsonQADataset
   file: data.retriever.nq-adv-hn-train
@@ -11,6 +15,10 @@ nq_train_hn1:
 nq_dev:
   _target_: dpr.data.biencoder_data.JsonQADataset
   file: data.retriever.nq-dev
+
+nq_dev_with_table:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: data.retriever.nq-dev-with-table
 
 trivia_train:
   _target_: dpr.data.biencoder_data.JsonQADataset
