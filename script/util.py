@@ -35,3 +35,15 @@ def extract_table_dataframe_from_interaction(interaction_object):
         rows_list.append(row_values)
     frame = pd.DataFrame(rows_list, columns=column_list)
     return frame
+
+def merge_JsonFiles(filenames, merged_file_name):
+    """
+    Given a list of json file name, merge them.
+    """
+    result = list()
+    for f1 in filenames:
+        with open(f1, 'r') as infile:
+            result.extend(json.load(infile))
+
+    with open(merged_file_name, 'w') as output_file:
+        json.dump(result, output_file)
