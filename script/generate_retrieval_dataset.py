@@ -1,6 +1,10 @@
 import json
 import csv
 import pickle
+from transformers import BertTokenizerFast
+from generate_table_passages import gen_table_passages
+from tqdm import tqdm
+
 
 def generate_retrieval_data(qa_list, nq_open_loc):
     nq_open_data = open(nq_open_loc)
@@ -43,7 +47,6 @@ def filter_and_save_table_qa_dataset(table_q_list, nq_open_train_loc, nq_open_de
     Save: filtered interaction itself.
     """
     print("==== Now filtering table_QA dataset ====")
-    print(f"Length before filtering: {len(table_q_list)}")
     original_nq_open_q_list = []
     with open(nq_open_train_loc, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter="\t")
@@ -58,7 +61,6 @@ def filter_and_save_table_qa_dataset(table_q_list, nq_open_train_loc, nq_open_de
             original_nq_open_q_list.append(question.strip())
     
     filtered_list = list(set(table_q_list) & set(original_nq_open_q_list))
-    print(f"Length after filtering: {len(filtered_list)}")
     
     with open(merged_interaction_loc, 'r') as f:
         merged_interaction_list = json.load(f)
@@ -74,7 +76,7 @@ def filter_and_save_table_qa_dataset(table_q_list, nq_open_train_loc, nq_open_de
     with open("/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions/filtered_interaction.json", "w+") as f:
         json.dump(filtered_interaction_list, f)
     print("Saving of filtered interaction list completed. Length : {}".format(len(filtered_interaction_list)))
-    return filtered_list
+    return filtered_interaction_list
 
 def extract_q_from_interaction_file_and_save(merged_nq_table_data_loc):
     """
@@ -147,6 +149,10 @@ def visualize_overlapped_qa_pair(dpr_loc, filtered_table_q_list, merged_interact
                 break
         
 def remove_duplicated_qa_pair(dpr_train_loc, dpr_dev_loc, filtered_interaction):
+    """
+    Remove qa pair from filtered_interaction where it is already exists in DPR
+    """
+    print("==== Now removing duplicated qa pair in filtered_list ====")
     with open(dpr_train_loc, 'r') as f:
         dpr_train = json.load(f)
     with open(dpr_dev_loc, 'r') as f:
@@ -171,7 +177,67 @@ def remove_duplicated_qa_pair(dpr_train_loc, dpr_dev_loc, filtered_interaction):
 
     return duplicated_removed_interaction
 
-    
+def generate_retrieval_data_without_hn(dup_removed_interaction, tokenizer):
+    """
+    Generate table retrieval data, without hard negatives.
+    Return: 
+    [
+        {
+            "question": "....",
+            "answers": ["...", "...", "..."],
+            "positive_ctxs": [{
+                "title": "...",
+                "text": "...."
+            }]
+        },
+        ...
+    ]
+    """
+    print("==== Now Generating table retrieval dataset without hard negatives. ====")
+
+    tb_retrieval_data = []
+    count = 0
+    for it_object in tqdm(dup_removed_interaction):
+        data = {}
+        table = it_object["table"]
+        title = table["documentTitle"]
+        question = it_object["questions"][0]["originalText"]
+        answers = it_object["questions"][0]["answer"]["answerTexts"]
+        
+        data["question"] = question
+        data["answers"] = answers
+        
+        positive_context = {}
+        linearized_column, psg_list = gen_table_passages(table, tokenizer)
+        gold_psg = ""
+        max_answer_num = 0
+        for psg in psg_list:
+            psg = tokenizer.decode(tokenizer.convert_tokens_to_ids(psg))
+            num_answers_found = 0
+            for answer in answers:
+                if answer in psg:
+                    num_answers_found+=1
+            if num_answers_found > max_answer_num:
+                max_answer_num = num_answers_found
+                gold_psg = psg
+        
+        gold_text = linearized_column + " [SEP] " + gold_psg
+        positive_context["title"] = title
+        positive_context["text"] = gold_text
+        data["positive_ctxs"] = [positive_context]
+        tb_retrieval_data.append(data)
+        
+    dlen = len(tb_retrieval_data)
+    train_data = tb_retrieval_data[0:(dlen//10)*9]
+    dev_data = tb_retrieval_data[(dlen//10)*9:]
+    with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_train.json", "w") as f:
+        json.dump(train_data, f)
+    with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_dev.json", "w") as f:
+        json.dump(dev_data, f)
+    print("Saving of retrieval data done.")
+    print(f"Number of training data: Train: {len(train_data)} , Dev: {len(dev_data)}")
+
+
 def main():
     merged_nq_table_data_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions/merged_interaction.json"
     dpr_nq_train_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train.json"
@@ -180,9 +246,10 @@ def main():
     original_nq_dev_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/qas/nq-dev.csv"
     original_nq_test_data_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/qas/nq-test.csv"
 
+    tokenizer = BertTokenizerFast.from_pretrained("bert-base-cased", additional_special_tokens = ['[C_SEP]', '[V_SEP]', '[R_SEP]'])
     table_q_list = extract_q_from_interaction_file_and_save(merged_nq_table_data_loc)
     filtered_interaction = filter_and_save_table_qa_dataset(table_q_list, original_nq_train_data_loc, original_nq_dev_data_loc, merged_nq_table_data_loc)
     dup_removed_interaction = remove_duplicated_qa_pair(dpr_nq_train_data_loc, dpr_nq_dev_data_loc, filtered_interaction)    
-        
+    generate_retrieval_data_without_hn(dup_removed_interaction, tokenizer)
 if __name__ == '__main__':
     main()

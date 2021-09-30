@@ -58,7 +58,8 @@ def gen_table_passages(table, tokenizer):
 
 # TODO: make sure to remove webhook when this releases publicly.
 @slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
-def main():    
+def main():
+    print("Now generating table passages.")    
     tokenizer = BertTokenizerFast.from_pretrained("bert-base-cased", additional_special_tokens = ['[C_SEP]', '[V_SEP]', '[R_SEP]'])
     table_data_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/tables/tables.jsonl"
     with open(table_data_loc, 'r') as table_file:
@@ -75,7 +76,6 @@ def main():
         linearized_column, psg_list = gen_table_passages(table, tokenizer)
         for psg in psg_list:
             psg = tokenizer.decode(tokenizer.convert_tokens_to_ids(psg))
-            psg = psg.replace("[CLS]", "\n")
             tsv_writer.writerow([psg_count, linearized_column + "[SEP]" + psg, table["documentTitle"]])
             psg_count+=1
         
