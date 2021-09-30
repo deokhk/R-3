@@ -20,13 +20,14 @@ def gen_tb_passages(table_passage_loc):
 
     
 es = Elasticsearch()
-table_passage_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100.tsv"
-bulk(es, gen_tb_passages(table_passage_loc)) # Index table passages. Wait a while till 1255730 passages are indexed..
+# table_passage_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100.tsv"
+# bulk(es, gen_tb_passages(table_passage_loc)) # Index table passages. Wait a while till 1255730 passages are indexed..
 
 with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_train.json", "r") as f:
     table_train = json.load(f)
 
 updated_table_train = []
+cnt = 0
 for qa_pair in tqdm(table_train):
     question = qa_pair["question"]
     answers = qa_pair["answers"]
@@ -37,7 +38,7 @@ for qa_pair in tqdm(table_train):
             }
         }
     }
-    res = es.search(index="table_passages", size=50, body = query)
+    res = es.search(index="table_passages", size=500, body = query)
     matched_passages = res["hits"]["hits"]
     # filter passage that does contain the answers.
     hn_passage = ""
@@ -54,13 +55,14 @@ for qa_pair in tqdm(table_train):
             title = x[0].strip()
             hn_passage = x[1].strip()
             break
-
+    if hn_passage == "":
+        print("Failed to find hard negative passages!")
     updated_qa_pair = qa_pair
     hn_ctxs = [{"title": title, "text": hn_passage}]
     updated_qa_pair["hard_negative_ctxs"] = hn_ctxs
     updated_table_train.append(updated_qa_pair)
 
-with open("table_train_updated.json", "w") as f:
+with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_train_updated.json", "w") as f:
     json.dump(updated_table_train, f)
 
 print("Adding a hard negative passage to table train qa pair completed!")
@@ -79,7 +81,7 @@ for qa_pair in tqdm(table_dev):
             }
         }
     }
-    res = es.search(index="table_passages", size=50, body = query)
+    res = es.search(index="table_passages", size=500, body = query)
     matched_passages = res["hits"]["hits"]
     # filter passage that does contain the answers.
     hn_passage = ""
@@ -96,13 +98,15 @@ for qa_pair in tqdm(table_dev):
             title = x[0].strip()
             hn_passage = x[1].strip()
             break
-
+    
+    if hn_passage == "":
+        print("Failed to find hard negative passages!")
     updated_qa_pair = qa_pair
     hn_ctxs = [{"title": title, "text": hn_passage}]
     updated_qa_pair["hard_negative_ctxs"] = hn_ctxs
     updated_table_dev.append(updated_qa_pair)
 
-with open("table_train_updated.json", "w") as f:
+with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_dev_updated.json", "w") as f:
     json.dump(updated_table_dev, f)
 
 print("Adding a hard negative passage to table dev qa pair completed!")
