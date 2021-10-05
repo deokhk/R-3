@@ -6,7 +6,7 @@ nq_train:
 
 nq_train_with_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: data.retriever.nq-train-with-table
+  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train-with-table.json"
 
 nq_train_hn1:
   _target_: dpr.data.biencoder_data.JsonQADataset
@@ -18,7 +18,7 @@ nq_dev:
 
 nq_dev_with_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: data.retriever.nq-dev-with-table
+  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev-with-table.json"
 
 trivia_train:
   _target_: dpr.data.biencoder_data.JsonQADataset

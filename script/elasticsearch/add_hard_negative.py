@@ -20,8 +20,8 @@ def gen_tb_passages(table_passage_loc):
 
     
 es = Elasticsearch()
-# table_passage_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100.tsv"
-# bulk(es, gen_tb_passages(table_passage_loc)) # Index table passages. Wait a while till 1255730 passages are indexed..
+table_passage_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100.tsv"
+bulk(es, gen_tb_passages(table_passage_loc)) # Index table passages. Wait a while till 1255730 passages are indexed..
 
 with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_train.json", "r") as f:
     table_train = json.load(f)
@@ -62,7 +62,7 @@ for qa_pair in tqdm(table_train):
     updated_qa_pair["hard_negative_ctxs"] = hn_ctxs
     updated_table_train.append(updated_qa_pair)
 
-with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_train_updated.json", "w") as f:
+with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_train_with_hn.json", "w") as f:
     json.dump(updated_table_train, f)
 
 print("Adding a hard negative passage to table train qa pair completed!")
@@ -106,7 +106,7 @@ for qa_pair in tqdm(table_dev):
     updated_qa_pair["hard_negative_ctxs"] = hn_ctxs
     updated_table_dev.append(updated_qa_pair)
 
-with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_dev_updated.json", "w") as f:
+with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_dev_with_hn.json", "w") as f:
     json.dump(updated_table_dev, f)
 
 print("Adding a hard negative passage to table dev qa pair completed!")

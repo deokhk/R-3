@@ -20,6 +20,7 @@ from typing import Tuple
 
 import hydra
 import torch
+from knockknock import slack_sender
 from omegaconf import DictConfig, OmegaConf
 from torch import Tensor as T
 from torch import nn
@@ -146,7 +147,7 @@ class BiEncoderTrainer(object):
             sampling_rates=sampling_rates if is_train_set else [1],
             rank=rank,
         )
-
+    @slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
     def run_train(self):
         cfg = self.cfg
 
