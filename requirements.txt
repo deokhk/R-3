@@ -1,0 +1,202 @@
+absl-py==0.12.0
+antlr4-python3-runtime==4.8
+apache-beam==2.28.0
+APScheduler==3.6.3
+argcomplete==1.12.3
+astunparse==1.6.3
+attrs @ file:///tmp/build/80754af9/attrs_1620827162558/work
+avro-python3==1.9.2.1
+backports.zoneinfo==0.2.1
+beautifulsoup4==4.9.3
+blis==0.7.4
+boto==2.49.0
+cachetools==4.2.2
+catalogue==2.0.6
+certifi==2021.5.30
+cffi==1.14.6
+charset-normalizer==2.0.4
+click==7.1.2
+cloudpickle==1.3.0
+crcmod==1.7
+cryptography==3.4.8
+cssselect==1.1.0
+cssutils==2.3.0
+cycler==0.10.0
+cymem==2.0.5
+Cython==0.29.24
+dataclasses==0.6
+decorator==5.0.9
+dill==0.3.1.1
+dm-tree==0.1.6
+docopt==0.6.2
+dpr @ file:///home/deokhk/research/MultiQA/model/DPR
+elasticsearch==7.15.0
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0-py3-none-any.whl
+faiss-cpu==1.7.1.post2
+fastavro==1.4.4
+fasteners==0.16.3
+filelock==3.0.12
+fonttools==4.25.0
+frozendict==1.2
+future==0.18.2
+gast==0.3.3
+gcs-oauth2-boto-plugin==2.7
+gensim==3.8.3
+gin-config==0.4.0
+google-api-core==1.31.2
+google-api-python-client==2.20.0
+google-apitools==0.5.31
+google-auth==1.35.0
+google-auth-httplib2==0.1.0
+google-auth-oauthlib==0.4.6
+google-cloud-bigquery==1.28.0
+google-cloud-bigtable==1.7.0
+google-cloud-build==2.0.0
+google-cloud-core==1.7.2
+google-cloud-datastore==1.15.3
+google-cloud-dlp==1.0.0
+google-cloud-language==1.3.0
+google-cloud-pubsub==1.7.0
+google-cloud-spanner==1.19.1
+google-cloud-videointelligence==1.16.1
+google-cloud-vision==1.0.0
+google-crc32c==1.1.5
+google-pasta==0.2.0
+google-reauth==0.1.1
+google-resumable-media==1.3.3
+googleapis-common-protos==1.53.0
+grpc-google-iam-v1==0.12.3
+grpcio==1.40.0
+grpcio-gcp==0.2.2
+h5py==2.10.0
+hdfs==2.6.0
+html5lib==1.1
+httplib2==0.17.4
+hydra-core==1.0.0
+idna==3.2
+importlib-metadata==4.8.1
+importlib-resources==5.2.2
+iniconfig @ file:///home/linux1/recipes/ci/iniconfig_1610983019677/work
+jeepney==0.7.1
+Jinja2==3.0.1
+joblib @ file:///tmp/build/80754af9/joblib_1613502643832/work
+jsonlines==2.0.0
+kaggle==1.5.6
+Keras-Preprocessing==1.1.2
+keyring==23.2.1
+kiwisolver==1.3.2
+knockknock==0.1.8.1
+libcst==0.3.20
+lxml==4.6.3
+Markdown==3.3.4
+MarkupSafe==2.0.1
+matplotlib==3.4.3
+matrix-client==0.4.0
+mkl-fft==1.3.0
+mkl-random @ file:///tmp/build/80754af9/mkl_random_1626186064646/work
+mkl-service==2.4.0
+mlperf-compliance==0.0.10
+mock==2.0.0
+monotonic==1.6
+more-itertools @ file:///tmp/build/80754af9/more-itertools_1622818384463/work
+munkres==1.1.4
+murmurhash==1.0.5
+mypy-extensions==0.4.3
+nltk==3.6.2
+numpy==1.18.5
+oauth2client==4.1.3
+oauthlib==3.1.1
+olefile @ file:///Users/ktietz/demo/mc3/conda-bld/olefile_1629805411829/work
+omegaconf==2.0.1
+opencv-python-headless==4.5.3.56
+opt-einsum==3.3.0
+packaging @ file:///tmp/build/80754af9/packaging_1625611678980/work
+pandas==1.0.5
+pathy==0.6.0
+pbr==5.6.0
+Pillow @ file:///tmp/build/80754af9/pillow_1625655817137/work
+pluggy @ file:///tmp/build/80754af9/pluggy_1615976321666/work
+premailer==3.10.0
+preshed==3.0.5
+promise==2.3
+proto-plus==1.19.0
+protobuf==3.17.3
+psutil==5.8.0
+py @ file:///tmp/build/80754af9/py_1607971587848/work
+py-cpuinfo==8.0.0
+pyarrow==2.0.0
+pyasn1==0.4.8
+pyasn1-modules==0.2.8
+pycparser==2.20
+pydantic==1.8.2
+pydot==1.4.2
+PyJWT==2.1.0
+pymongo==3.12.0
+pyOpenSSL==20.0.1
+pyparsing @ file:///home/linux1/recipes/ci/pyparsing_1610983426697/work
+pytest==6.2.4
+pytest-runner @ file:///tmp/build/80754af9/pytest-runner_1623663836848/work
+python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+python-slugify==5.0.2
+python-telegram-bot==13.7
+pytz==2021.1
+pyu2f==0.1.5
+PyYAML==5.4.1
+regex==2021.8.28
+requests==2.26.0
+requests-oauthlib==1.3.0
+retry-decorator==1.1.1
+rsa==4.7.2
+sacremoses==0.0.45
+scikit-learn @ file:///tmp/build/80754af9/scikit-learn_1621370412049/work
+scipy @ file:///tmp/build/80754af9/scipy_1630606796110/work
+SecretStorage==3.3.1
+sentencepiece==0.1.96
+sip==4.19.13
+six @ file:///tmp/build/80754af9/six_1623709665295/work
+smart-open==5.2.1
+soupsieve==2.2.1
+spacy==3.1.2
+spacy-legacy==3.0.8
+srsly==2.4.1
+tensorboard==2.2.2
+tensorboard-plugin-wit==1.8.0
+tensorflow==2.2.3
+tensorflow-addons==0.14.0
+tensorflow-datasets==4.4.0
+tensorflow-estimator==2.2.0
+tensorflow-hub==0.12.0
+tensorflow-metadata==1.2.0
+tensorflow-model-optimization==0.6.0
+tensorflow-probability==0.10.1
+termcolor==1.1.0
+text-unidecode==1.3
+tf-models-official==2.2.2
+tf-slim==1.1.0
+thinc==8.0.8
+threadpoolctl @ file:///Users/ktietz/demo/mc3/conda-bld/threadpoolctl_1629802263681/work
+tokenizers==0.8.1rc1
+toml @ file:///tmp/build/80754af9/toml_1616166611790/work
+torch==1.9.0
+torchaudio==0.9.0a0+33b2469
+torchvision==0.10.0
+tornado @ file:///tmp/build/80754af9/tornado_1606942300299/work
+tqdm==4.62.2
+transformers==3.0.2
+twilio==7.0.0
+typeguard==2.12.1
+typer==0.3.2
+typing==3.7.4.1
+typing-extensions==3.7.4.3
+typing-inspect==0.7.1
+tzlocal==3.0
+uritemplate==3.0.1
+urllib3==1.24.3
+wasabi==0.8.2
+webencodings==0.5.1
+Werkzeug==2.0.1
+wget==3.2
+wrapt==1.12.1
+yagmail==0.14.260
+yellowbrick==1.2
+zipp==3.5.0
