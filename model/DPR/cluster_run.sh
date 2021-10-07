@@ -4,7 +4,7 @@
 #SBATCH -output_.%j.out # standard output and error log
 #SBATCH -p  A100 # queue name or partiton name
 #SBATCH -t 72:00:00 # Run time (hh:mm:ss)
-#SBATCH  --gres=gpu:4
+#SBATCH  --gres=gpu:2
 #SBATCH  --nodes=1
 #SBATCH  --ntasks=1
 #SBATCH  --tasks-per-node=1
