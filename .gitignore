@@ -142,3 +142,4 @@ cython_debug/
 *.tfrecord
 *.tsv
 *.csv
+/model/DPR/outputs
