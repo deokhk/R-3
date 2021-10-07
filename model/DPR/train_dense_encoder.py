@@ -730,12 +730,16 @@ def _do_biencoder_fwd_pass(
     if cfg.n_gpu > 1:
         loss = loss.mean()
     if cfg.train.gradient_accumulation_steps > 1:
-        loss = loss / cfg.gradient_accumulation_steps
+        loss = loss / cfg.train.gradient_accumulation_steps
     return loss, is_correct
 
 
 @hydra.main(config_path="conf", config_name="biencoder_train_cfg")
 def main(cfg: DictConfig):
+    print("====================")
+    print(cfg.train)
+    print("====================")
+
     if cfg.train.gradient_accumulation_steps < 1:
         raise ValueError(
             "Invalid gradient_accumulation_steps parameter: {}, should be >= 1".format(
