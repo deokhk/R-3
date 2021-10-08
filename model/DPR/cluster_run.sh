@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#SBATCH -J dpr_with_table # job name
-#SBATCH -output_.%j.out # standard output and error log
-#SBATCH -p  A100 # queue name or partiton name
+#SBATCH -J dpr_with_table_scratch # job name
+#SBATCH -o sbatch_output_log/output_%x.out # standard output and error log
+#SBATCH -p  2080ti # queue name or partiton name
 #SBATCH -t 72:00:00 # Run time (hh:mm:ss)
-#SBATCH  --gres=gpu:2
+#SBATCH  --gres=gpu:8
 #SBATCH  --nodes=1
 #SBATCH  --ntasks=1
 #SBATCH  --tasks-per-node=1
@@ -14,7 +14,8 @@ srun -l /bin/hostname
 srun -l /bin/pwd
 srun -l /bin/date
 
-module purge
+module purge 
+module load postech
 
 date
 
