@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -J generate_embeddings_chkpt # job name
+#SBATCH -J generate_embeddings_scratch # job name
 #SBATCH -o sbatch_output_log/output_%x.out # standard output and error log
 #SBATCH -p  2080ti # queue name or partiton name
 #SBATCH -t 72:00:00 # Run time (hh:mm:ss)
@@ -19,6 +19,6 @@ module load postech
 
 date
 
-sh gen_embedding_chkpt.sh
+sh gen_embedding_scratch.sh
 
 date
