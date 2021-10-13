@@ -146,3 +146,4 @@ cython_debug/
 /model/DPR/outputs
 /model/DPR/sbatch_output_log
 /model/DPR/trained_model_checkpoints
+/model/DPR/dense_embeddings

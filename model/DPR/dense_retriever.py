@@ -19,6 +19,7 @@ from typing import List, Tuple, Dict, Iterator
 import hydra
 import numpy as np
 import torch
+from knockknock import slack_sender
 from omegaconf import DictConfig, OmegaConf
 from torch import Tensor as T
 from torch import nn
@@ -264,6 +265,7 @@ def validate_tables(
     return match_stats.top_k_chunk_hits
 
 
+@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
 @hydra.main(config_path="conf", config_name="dense_retriever")
 def main(cfg: DictConfig):
     cfg = setup_cfg_gpu(cfg)
