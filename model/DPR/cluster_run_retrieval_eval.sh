@@ -16,10 +16,9 @@ srun -l /bin/pwd
 srun -l /bin/date
 
 module purge 
-module load postech
 
 date
 
-sh eval_retrieval_scratch.sh
+sh ./training_scripts/eval_retrieval_scratch.sh
 
 date
