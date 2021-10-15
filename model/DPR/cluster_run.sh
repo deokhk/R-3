@@ -15,10 +15,9 @@ srun -l /bin/pwd
 srun -l /bin/date
 
 module purge 
-module load postech
 
 date
 
-sh gen_embedding_scratch.sh
+sh ./training_scripts/gen_embedding_scratch.sh
 
 date
