@@ -38,7 +38,7 @@ def prepare_datas(context_file, category):
 def main():
     train_context_path = "/home/deokhk/research/MultiQA/model/DPR/retrieval_eval_output/context_for_reader/c_reader_train.json"
     dev_context_path = "/home/deokhk/research/MultiQA/model/DPR/retrieval_eval_output/context_for_reader/c_reader_dev.json"
-    test_context_path = "/home/deokhk/research/MultiQA/model/DPR/retrieval_eval_output/from_new_hn_ckpt.json"
+    test_context_path = "/home/deokhk/research/MultiQA/model/DPR/retrieval_eval_output/context_for_reader/c_reader_test.json"
 
     paths = [train_context_path, dev_context_path, test_context_path]
     categories = ["train", "dev", "test"]

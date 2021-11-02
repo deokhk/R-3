@@ -1,0 +1,3 @@
+[submodule "FiD"]
+	path = FiD
+	url = git@github.com:facebookresearch/FiD.git
