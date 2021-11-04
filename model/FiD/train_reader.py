@@ -12,6 +12,7 @@ import numpy as np
 from pathlib import Path
 from torch.utils.data import DataLoader, RandomSampler, DistributedSampler, SequentialSampler
 from src.options import Options
+from knockknock import slack_sender
 
 import src.slurm
 import src.util
@@ -19,7 +20,7 @@ import src.evaluation
 import src.data
 import src.model
 
-
+@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
 def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, collator, best_dev_em, checkpoint_path):
 
     if opt.is_main:
@@ -171,22 +172,27 @@ if __name__ == "__main__":
     )
     eval_dataset = src.data.Dataset(eval_examples, opt.n_context)
 
-    if not checkpoint_exists and opt.model_path == "none":
-        t5 = transformers.T5ForConditionalGeneration.from_pretrained(model_name)
-        model = src.model.FiDT5(t5.config)
-        model.load_t5(t5.state_dict())
-        model = model.to(opt.local_rank)
-        optimizer, scheduler = src.util.set_optim(opt, model)
+    if opt.fine_tune_pretrained_model:
         step, best_dev_em = 0, 0.0
-    elif opt.model_path == "none":
-        load_path = checkpoint_path / 'checkpoint' / 'latest'
-        model, optimizer, scheduler, opt_checkpoint, step, best_dev_em = \
-            src.util.load(model_class, load_path, opt, reset_params=False)
-        logger.info(f"Model loaded from {load_path}")
+        model, optimizer, scheduler = src.util.load_with_pretrained_model(model_class, opt.model_path, opt)
+        logger.info(f"Pretrained Model loaded from {opt.model_path}")
     else:
-        model, optimizer, scheduler, opt_checkpoint, step, best_dev_em = \
-            src.util.load(model_class, opt.model_path, opt, reset_params=True)
-        logger.info(f"Model loaded from {opt.model_path}")
+        if not checkpoint_exists and opt.model_path == "none":
+            t5 = transformers.T5ForConditionalGeneration.from_pretrained(model_name)
+            model = src.model.FiDT5(t5.config)
+            model.load_t5(t5.state_dict())
+            model = model.to(opt.local_rank)
+            optimizer, scheduler = src.util.set_optim(opt, model)
+            step, best_dev_em = 0, 0.0
+        elif opt.model_path == "none":
+            load_path = checkpoint_path / 'checkpoint' / 'latest'
+            model, optimizer, scheduler, opt_checkpoint, step, best_dev_em = \
+                src.util.load(model_class, load_path, opt, reset_params=False)
+            logger.info(f"Model loaded from {load_path}")
+        else:
+            model, optimizer, scheduler, opt_checkpoint, step, best_dev_em = \
+                src.util.load(model_class, opt.model_path, opt, reset_params=True)
+            logger.info(f"Model loaded from {opt.model_path}")
 
     model.set_checkpoint(opt.use_checkpoint)
 
@@ -199,6 +205,7 @@ if __name__ == "__main__":
         )
 
     logger.info("Start training")
+
     train(
         model,
         optimizer,

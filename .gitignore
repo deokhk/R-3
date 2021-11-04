@@ -149,3 +149,5 @@ cython_debug/
 /model/DPR/retrieval_eval_output
 /model/DPR/reader_dataset
 /model/DPR/dense_embeddings
+/model/FiD/checkpoint
+/model/FiD/pretrained_models

@@ -92,6 +92,16 @@ def load(model_class, dir_path, opt, reset_params=False):
 
     return model, optimizer, scheduler, opt_checkpoint, step, best_eval_metric
 
+def load_with_pretrained_model(model_class, dir_path, opt):
+    epoch_path = os.path.realpath(dir_path)
+    logger.info("Loading %s" % epoch_path)
+    model = model_class.from_pretrained(epoch_path)
+    model = model.to(opt.device)
+
+    optimizer, scheduler = set_optim(opt, model)
+
+    return model, optimizer, scheduler
+
 class WarmupLinearScheduler(torch.optim.lr_scheduler.LambdaLR):
     def __init__(self, optimizer, warmup_steps, scheduler_steps, min_ratio, fixed_lr, last_epoch=-1):
         self.warmup_steps = warmup_steps
