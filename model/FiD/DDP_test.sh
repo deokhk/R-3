@@ -6,7 +6,7 @@ python train_reader.py \
         --model_size base \
         --model_path "/home/deokhk/research/MultiQA/model/FiD/pretrained_models/nq_reader_base" \
         --per_gpu_batch_size 1 \
-        --n_context 100 \
+        --n_context 5 \
         --fine_tune_pretrained_model \
         --name DDP_test \
         --checkpoint_dir checkpoint \

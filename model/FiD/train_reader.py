@@ -13,6 +13,11 @@ from pathlib import Path
 from torch.utils.data import DataLoader, RandomSampler, DistributedSampler, SequentialSampler
 from src.options import Options
 from knockknock import slack_sender
+from torch.nn.parallel import DistributedDataParallel as DDP
+
+import torch.distributed as dist
+import torch.multiprocessing as mp
+
 
 import src.slurm
 import src.util
@@ -31,14 +36,16 @@ def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, c
             logger.warning('Tensorboard is not available.')
 
     torch.manual_seed(opt.global_rank + opt.seed) #different seed for different sampling depending on global_rank
-    train_sampler = RandomSampler(train_dataset)
+    train_sampler = DistributedSampler(train_dataset)
     train_dataloader = DataLoader(
         train_dataset,
         sampler=train_sampler,
         batch_size=opt.per_gpu_batch_size,
         drop_last=True,
         num_workers=10,
-        collate_fn=collator
+        collate_fn=collator,
+        shuffle=False,
+        pin_memory = True
     )
 
     loss, curr_loss = 0.0, 0.0
