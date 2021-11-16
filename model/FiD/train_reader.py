@@ -64,7 +64,6 @@ def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, r
                 optimizer.step()
                 scheduler.step()
                 model.zero_grad()
-                logger.info(f"now the step is: {step}")
 
             train_loss = src.util.average_main(train_loss, opt)
             curr_loss += train_loss.item()
