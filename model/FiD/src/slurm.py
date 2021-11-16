@@ -144,6 +144,7 @@ def init_distributed_mode(params):
 
 
     # initialize multi-GPU
+    
     if params.is_distributed:
 
         # http://pytorch.apachecn.org/en/0.3.0/distributed.html#environment-variable-initialization

@@ -49,6 +49,11 @@ class Options():
         self.parser.add_argument('--n_context', type=int, default=1)
         self.parser.add_argument('--fine_tune_pretrained_model', action='store_true', help='whether to finetune pretrained model')
 
+    def add_DDP_options(self):
+        self.parser.add_argument('-n', '--nodes', default=1, type=int, metavar='N')
+        self.parser.add_argument('-g', '--gpus', default=1, type=int, help='number of gpus per node')
+        self.parser.add_argument('-nr', '--nr', default=0, type=int, help='ranking within the nodes')
+
     def add_retriever_options(self):
         self.parser.add_argument('--train_data', type=str, default='none', help='path of train data')
         self.parser.add_argument('--eval_data', type=str, default='none', help='path of eval data')

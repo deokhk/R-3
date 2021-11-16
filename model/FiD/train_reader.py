@@ -1,14 +1,10 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-
 import time
+import os 
 import sys
 import torch
 import transformers
 import numpy as np
+import subprocess
 from pathlib import Path
 from torch.utils.data import DataLoader, RandomSampler, DistributedSampler, SequentialSampler
 from src.options import Options
@@ -25,26 +21,23 @@ import src.evaluation
 import src.data
 import src.model
 
+
 @slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
-def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, collator, best_dev_em, checkpoint_path):
-
-    if opt.is_main:
-        try:
-            tb_logger = torch.utils.tensorboard.SummaryWriter(Path(opt.checkpoint_dir)/opt.name)
-        except:
-            tb_logger = None
-            logger.warning('Tensorboard is not available.')
-
-    torch.manual_seed(opt.global_rank + opt.seed) #different seed for different sampling depending on global_rank
-    train_sampler = DistributedSampler(train_dataset)
+def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, rank, collator, best_dev_em, checkpoint_path, logger, tokenizer):
+    torch.manual_seed(0) #different seed for different sampling depending on global_rank
+    train_sampler = DistributedSampler(
+        train_dataset,
+        num_replicas = opt.world_size,
+        rank = rank
+    )
     train_dataloader = DataLoader(
         train_dataset,
         sampler=train_sampler,
         batch_size=opt.per_gpu_batch_size,
         drop_last=True,
-        num_workers=10,
+        num_workers=4,
         collate_fn=collator,
-        shuffle=False,
+        shuffle = False,
         pin_memory = True
     )
 
@@ -88,9 +81,6 @@ def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, c
                     log += f"lr: {scheduler.get_last_lr()[0]:.5f}"
                     logger.info(log)
                     curr_loss = 0
-                    if tb_logger is not None:
-                        tb_logger.add_scalar("Evaluation", dev_em, step)
-                        tb_logger.add_scalar("Training", curr_loss / (opt.eval_freq), step)
 
             if opt.is_main and step % opt.save_freq == 0:
                 src.util.save(model, optimizer, scheduler, step, best_dev_em,
@@ -131,21 +121,20 @@ def evaluate(model, dataset, tokenizer, collator, opt):
     exactmatch, total = src.util.weighted_average(np.mean(exactmatch), total, opt)
     return exactmatch
 
-if __name__ == "__main__":
-    options = Options()
-    options.add_reader_options()
-    options.add_optim_options()
-    opt = options.parse()
-    #opt = options.get_options(use_reader=True, use_optim=True)
+def main_loop(gpu, opt):
+    rank = opt.nr * opt.gpus + gpu
+    opt.is_main = (rank == 0)
+    dist.init_process_group(
+        backend='nccl',
+        init_method='env://',
+        world_size = opt.world_size,
+        rank=rank
+    )
 
-    torch.manual_seed(opt.seed)
-    src.slurm.init_distributed_mode(opt)
-    src.slurm.init_signal_handler()
-
+    torch.manual_seed(0)
     checkpoint_path = Path(opt.checkpoint_dir)/opt.name
     checkpoint_exists = checkpoint_path.exists()
-    if opt.is_distributed:
-        torch.distributed.barrier()
+    torch.distributed.barrier()
     checkpoint_path.mkdir(parents=True, exist_ok=True)
     #if not checkpoint_exists and opt.is_main:
     #    options.print_options(opt)
@@ -167,21 +156,24 @@ if __name__ == "__main__":
     # use golbal rank and world size to split the eval set on multiple gpus
     train_examples = src.data.load_data(
         opt.train_data, 
-        global_rank=opt.global_rank, 
+        global_rank=rank, 
         world_size=opt.world_size,
     )
     train_dataset = src.data.Dataset(train_examples, opt.n_context)
     # use golbal rank and world size to split the eval set on multiple gpus
     eval_examples = src.data.load_data(
         opt.eval_data,
-        global_rank=opt.global_rank,
+        global_rank=rank,
         world_size=opt.world_size,
     )
     eval_dataset = src.data.Dataset(eval_examples, opt.n_context)
-
+    opt.device = gpu
+    torch.cuda.set_device(gpu)
     if opt.fine_tune_pretrained_model:
         step, best_dev_em = 0, 0.0
         model, optimizer, scheduler = src.util.load_with_pretrained_model(model_class, opt.model_path, opt)
+        if opt.is_distributed:
+            model = model.to(gpu)
         logger.info(f"Pretrained Model loaded from {opt.model_path}")
     else:
         if not checkpoint_exists and opt.model_path == "none":
@@ -200,15 +192,13 @@ if __name__ == "__main__":
             model, optimizer, scheduler, opt_checkpoint, step, best_dev_em = \
                 src.util.load(model_class, opt.model_path, opt, reset_params=True)
             logger.info(f"Model loaded from {opt.model_path}")
-
+    
     model.set_checkpoint(opt.use_checkpoint)
 
     if opt.is_distributed:
         model = torch.nn.parallel.DistributedDataParallel(
             model,
-            device_ids=[opt.local_rank],
-            output_device=opt.local_rank,
-            find_unused_parameters=False,
+            device_ids=[gpu]
         )
 
     logger.info("Start training")
@@ -221,7 +211,27 @@ if __name__ == "__main__":
         train_dataset,
         eval_dataset,
         opt,
+        rank,
         collator,
         best_dev_em,
-        checkpoint_path
+        checkpoint_path,
+        logger,
+        tokenizer
     )
+
+if __name__ == "__main__":
+    options = Options()
+    options.add_reader_options()
+    options.add_optim_options()
+    options.add_DDP_options()
+    opt = options.parse()
+
+    if opt.gpus > 1:
+        opt.is_distributed = True
+    opt.world_size = opt.gpus * opt.nodes
+    hostnames = subprocess.check_output(['scontrol', 'show', 'hostnames', os.environ['SLURM_JOB_NODELIST']])
+    main_addr = hostnames.split()[0].decode('utf-8')
+    os.environ["MASTER_ADDR"] = main_addr
+    os.environ["MASTER_PORT"] = "8888"
+    mp.spawn(main_loop, nprocs=opt.gpus, args=(opt, ))
+
