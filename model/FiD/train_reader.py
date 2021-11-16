@@ -1,6 +1,7 @@
 import time
 import os 
 import sys
+import wandb
 import torch
 import transformers
 import numpy as np
@@ -23,7 +24,7 @@ import src.model
 
 
 @slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
-def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, rank, collator, best_dev_em, checkpoint_path, logger, tokenizer):
+def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, rank, collator, best_dev_em, checkpoint_path, logger, tokenizer, run=None):
     torch.manual_seed(0) #different seed for different sampling depending on global_rank
     train_sampler = DistributedSampler(
         train_dataset,
@@ -63,13 +64,14 @@ def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, r
                 optimizer.step()
                 scheduler.step()
                 model.zero_grad()
+                logger.info(f"now the step is: {step}")
 
             train_loss = src.util.average_main(train_loss, opt)
             curr_loss += train_loss.item()
 
             if step % opt.eval_freq == 0:
                 dev_em = evaluate(model, eval_dataset, tokenizer, collator, opt)
-                model.train()
+                model.eval()
                 if opt.is_main:
                     if dev_em > best_dev_em:
                         best_dev_em = dev_em
@@ -80,7 +82,10 @@ def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, r
                     log += f"evaluation: {100*dev_em:.2f}EM |"
                     log += f"lr: {scheduler.get_last_lr()[0]:.5f}"
                     logger.info(log)
+                    if opt.do_wandb_log:
+                        run.log({"steps": step, "train_loss": curr_loss/opt.eval_freq, "dev_EM": 100*dev_em, "lr": scheduler.get_last_lr()[0]})
                     curr_loss = 0
+                model.train()
 
             if opt.is_main and step % opt.save_freq == 0:
                 src.util.save(model, optimizer, scheduler, step, best_dev_em,
@@ -122,6 +127,7 @@ def evaluate(model, dataset, tokenizer, collator, opt):
     return exactmatch
 
 def main_loop(gpu, opt):
+    run = None
     rank = opt.nr * opt.gpus + gpu
     opt.is_main = (rank == 0)
     dist.init_process_group(
@@ -131,6 +137,12 @@ def main_loop(gpu, opt):
         rank=rank
     )
 
+    if opt.is_main and opt.do_wandb_log:
+        run = wandb.init(
+            name = opt.name,
+            entity = opt.entity,
+            project = opt.project,
+        )
     torch.manual_seed(0)
     checkpoint_path = Path(opt.checkpoint_dir)/opt.name
     checkpoint_exists = checkpoint_path.exists()
@@ -216,14 +228,17 @@ def main_loop(gpu, opt):
         best_dev_em,
         checkpoint_path,
         logger,
-        tokenizer
+        tokenizer,
+        run
     )
+
 
 if __name__ == "__main__":
     options = Options()
     options.add_reader_options()
     options.add_optim_options()
     options.add_DDP_options()
+    options.add_wandb_options()
     opt = options.parse()
 
     if opt.gpus > 1:

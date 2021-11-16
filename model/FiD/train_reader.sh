@@ -8,7 +8,7 @@ python train_reader.py \
         --per_gpu_batch_size 1 \
         --n_context 100 \
         --fine_tune_pretrained_model \
-        --name accum_64_nq_text_table \
+        --name 64_multi_available \
         --checkpoint_dir checkpoint \
         --use_checkpoint \
         --lr 0.00005 \
@@ -16,15 +16,17 @@ python train_reader.py \
         --scheduler linear \
         --weight_decay 0.01 \
         --text_maxlength 250 \
-        --total_step 2000 \
-        --warmup_step 200 \
-        --accumulation_steps 64 \
-        --eval_freq 200 
+        --total_step 16000 \
+        --warmup_step 1600 \
+        --accumulation_steps 16 \
+        --eval_freq 400 \
+        --gpus 4 \
+        --do_wandb_log
 
 python test_reader.py \
         --model_path checkpoint/accum_64_nq_text_table/checkpoint/best_dev \
         --eval_data "/home/deokhk/research/MultiQA/model/DPR/reader_dataset/test.json" \
         --per_gpu_batch_size 1 \
         --n_context 100 \
-        --name accum_64_test_plain_reader \
+        --name 64_multi_available \
         --checkpoint_dir checkpoint \

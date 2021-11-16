@@ -17,7 +17,7 @@ python train_reader.py \
         --weight_decay 0.01 \
         --text_maxlength 250 \
         --total_step 200 \
-        --warmup_step 10 \
-        --accumulation_steps 4 \
-        --eval_freq 5 \
-        --gpus 2
+        --warmup_step 0 \
+        --accumulation_steps 2 \
+        --eval_freq 3 \
+        --gpus 2 \

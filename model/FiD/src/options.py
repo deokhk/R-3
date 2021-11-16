@@ -54,6 +54,12 @@ class Options():
         self.parser.add_argument('-g', '--gpus', default=1, type=int, help='number of gpus per node')
         self.parser.add_argument('-nr', '--nr', default=0, type=int, help='ranking within the nodes')
 
+    def add_wandb_options(self):
+        self.parser.add_argument('--entity', default="deokhk", type=str)
+        self.parser.add_argument('--project', default="FiD-plain", type=str)
+        self.parser.add_argument('--do_wandb_log', action='store_true',
+                        help='Do wandb logging')
+
     def add_retriever_options(self):
         self.parser.add_argument('--train_data', type=str, default='none', help='path of train data')
         self.parser.add_argument('--eval_data', type=str, default='none', help='path of eval data')
