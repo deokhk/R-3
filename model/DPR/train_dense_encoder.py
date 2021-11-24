@@ -150,7 +150,6 @@ class BiEncoderTrainer(object):
     @slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
     def run_train(self):
         cfg = self.cfg
-
         train_iterator = self.get_data_iterator(
             cfg.train.batch_size,
             True,
