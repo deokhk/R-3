@@ -151,4 +151,5 @@ cython_debug/
 /model/DPR/dense_embeddings
 /model/FiD/checkpoint
 /model/FiD/pretrained_models
+/model/FiD/wandb
 /dataset

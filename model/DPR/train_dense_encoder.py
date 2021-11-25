@@ -68,6 +68,10 @@ class BiEncoderTrainer(object):
         self.distributed_factor = cfg.distributed_world_size or 1
 
         logger.info("***** Initializing components for training *****")
+        if cfg.use_relational_embedding == True:
+            logger.info("***** Training Relational-aware DPR *****")
+        else:
+            logger.info("***** Training plain DPR *****")
 
         # if model file is specified, encoder parameters from saved state should be used for initialization
         model_file = get_model_file(cfg, cfg.checkpoint_file_name)
@@ -75,8 +79,8 @@ class BiEncoderTrainer(object):
         if model_file:
             saved_state = load_states_from_checkpoint(model_file)
             set_cfg_params_from_state(saved_state.encoder_params, cfg)
-
-        tensorizer, model, optimizer = init_biencoder_components(cfg.encoder.encoder_model_type, cfg)
+            
+        tensorizer, model, optimizer = init_biencoder_components(cfg.encoder.encoder_model_type, cfg.use_relational_embedding, cfg)
 
         model, optimizer = setup_for_distributed_mode(
             model,

@@ -21,44 +21,63 @@ from transformers.tokenization_bert import BertTokenizer
 from transformers.tokenization_roberta import RobertaTokenizer
 
 from dpr.models.biencoder import BiEncoder
+from dpr.models.relational_biencoder import RelationalBiEncoder
 from dpr.utils.data_utils import Tensorizer
 from .reader import Reader
 
 logger = logging.getLogger(__name__)
 
+def get_relational_bert_biencoder_components(cfg, inference_only: bool = False, **kwargs):
+    dropout = cfg.encoder.dropout if hasattr(cfg.encoder, "dropout") else 0.0
+    question_encoder = HFBertEncoder.init_encoder(
+        cfg.encoder.pretrained_model_cfg,
+        projection_dim=cfg.encoder.projection_dim,
+        dropout=dropout,
+        pretrained=cfg.encoder.pretrained,
+        **kwargs
+    )
+    ctx_encoder = RelationalHFBertEncoder.init_encoder(
+        cfg.encoder.pretrained_model_cfg,
+        projection_dim=cfg.encoder.projection_dim,
+        dropout=dropout,
+        pretrained=cfg.encoder.pretrained,
+        **kwargs
+    )
+
+    fix_ctx_encoder = cfg.fix_ctx_encoder if hasattr(cfg, "fix_ctx_encoder") else False
+
+    biencoder = RelationalBiEncoder(question_encoder, ctx_encoder, fix_ctx_encoder=fix_ctx_encoder)
+
+    optimizer = (
+        get_optimizer(
+            biencoder,
+            learning_rate=cfg.train.learning_rate,
+            adam_eps=cfg.train.adam_eps,
+            weight_decay=cfg.train.weight_decay,
+        )
+        if not inference_only
+        else None
+    )
+
+    tensorizer = get_bert_tensorizer(cfg)
+    return tensorizer, biencoder, optimizer
 
 def get_bert_biencoder_components(cfg, inference_only: bool = False, **kwargs):
     dropout = cfg.encoder.dropout if hasattr(cfg.encoder, "dropout") else 0.0
-    if cfg.use_relational_embedding == True:
-        question_encoder = RelationalHFBertEncoder.init_encoder(
-            cfg.encoder.pretrained_model_cfg,
-            projection_dim=cfg.encoder.projection_dim,
-            dropout=dropout,
-            pretrained=cfg.encoder.pretrained,
-            **kwargs
-        )
-        ctx_encoder = RelationalHFBertEncoder.init_encoder(
-            cfg.encoder.pretrained_model_cfg,
-            projection_dim=cfg.encoder.projection_dim,
-            dropout=dropout,
-            pretrained=cfg.encoder.pretrained,
-            **kwargs
-        )
-    else:
-        question_encoder = HFBertEncoder.init_encoder(
-            cfg.encoder.pretrained_model_cfg,
-            projection_dim=cfg.encoder.projection_dim,
-            dropout=dropout,
-            pretrained=cfg.encoder.pretrained,
-            **kwargs
-        )
-        ctx_encoder = HFBertEncoder.init_encoder(
-            cfg.encoder.pretrained_model_cfg,
-            projection_dim=cfg.encoder.projection_dim,
-            dropout=dropout,
-            pretrained=cfg.encoder.pretrained,
-            **kwargs
-        )
+    question_encoder = HFBertEncoder.init_encoder(
+        cfg.encoder.pretrained_model_cfg,
+        projection_dim=cfg.encoder.projection_dim,
+        dropout=dropout,
+        pretrained=cfg.encoder.pretrained,
+        **kwargs
+    )
+    ctx_encoder = HFBertEncoder.init_encoder(
+        cfg.encoder.pretrained_model_cfg,
+        projection_dim=cfg.encoder.projection_dim,
+        dropout=dropout,
+        pretrained=cfg.encoder.pretrained,
+        **kwargs
+    )
 
     fix_ctx_encoder = cfg.fix_ctx_encoder if hasattr(cfg, "fix_ctx_encoder") else False
 
@@ -153,7 +172,7 @@ def get_optimizer(
     weight_decay: float = 0.0,
 ) -> torch.optim.Optimizer:
     no_decay = ["bias", "LayerNorm.weight"]
-
+    # TODO: optimizer setting 바꾸기. 일단 한번 돌려보고 model에서 embedding layer의 param 어떻게 접근할것인지 확인
     optimizer_grouped_parameters = [
         {
             "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
@@ -164,7 +183,7 @@ def get_optimizer(
             "weight_decay": 0.0,
         },
     ]
-    optimizer = AdamW(optimizer_grouped_parameters, lr=learning_rate, eps=adam_eps)
+    optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=learning_rate, eps=adam_eps)
     return optimizer
 
 

@@ -11,6 +11,12 @@ import importlib
  'Router'-like set of methods for component initialization with lazy imports 
 """
 
+def init_hf_relational_bert_biencoder(args, **kwargs):
+    if importlib.util.find_spec("transformers") is None:
+        raise RuntimeError("Please install transformers lib")
+    from .hf_models import get_relational_bert_biencoder_components
+
+    return get_relational_bert_biencoder_components(args, **kwargs)
 
 def init_hf_bert_biencoder(args, **kwargs):
     if importlib.util.find_spec("transformers") is None:
@@ -66,6 +72,11 @@ BIENCODER_INITIALIZERS = {
     "fairseq_roberta": init_fairseq_roberta_biencoder,
 }
 
+RELATIONAL_BIENCODER_INITIALIZERS = {
+    "hf_bert" : init_hf_relational_bert_biencoder
+}
+
+
 READER_INITIALIZERS = {
     "hf_bert": init_hf_bert_reader,
 }
@@ -85,8 +96,11 @@ def init_comp(initializers_dict, type, args, **kwargs):
         raise RuntimeError("unsupported model type: {}".format(type))
 
 
-def init_biencoder_components(encoder_type: str, args, **kwargs):
-    return init_comp(BIENCODER_INITIALIZERS, encoder_type, args, **kwargs)
+def init_biencoder_components(encoder_type: str, use_relational_embedding: bool, args, **kwargs):
+    if use_relational_embedding == True:
+        return init_comp(RELATIONAL_BIENCODER_INITIALIZERS, encoder_type, args, **kwargs)
+    else:
+        return init_comp(BIENCODER_INITIALIZERS, encoder_type, args, **kwargs)
 
 
 def init_reader_components(encoder_type: str, args, **kwargs):
