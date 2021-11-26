@@ -70,7 +70,7 @@ class RelationalBiEncoder(nn.Module):
         attn_mask: T,
         fix_encoder: bool = False,
         representation_token_pos=0,
-    ) -> (T, T, T):
+    ) -> Tuple[T, T, T]:
         sequence_output = None
         pooled_output = None
         hidden_states = None

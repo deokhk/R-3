@@ -59,7 +59,7 @@ def get_relational_bert_biencoder_components(cfg, inference_only: bool = False, 
         else None
     )
 
-    tensorizer = get_bert_tensorizer(cfg)
+    tensorizer = get_relational_bert_tensorizer(cfg)
     return tensorizer, biencoder, optimizer
 
 def get_bert_biencoder_components(cfg, inference_only: bool = False, **kwargs):
@@ -125,6 +125,18 @@ def get_bert_reader_components(cfg, inference_only: bool = False, **kwargs):
     tensorizer = get_bert_tensorizer(cfg)
     return tensorizer, reader, optimizer
 
+
+def get_relational_bert_tensorizer(cfg, tokenizer=None):
+    sequence_length = cfg.encoder.sequence_length
+    pretrained_model_cfg = cfg.encoder.pretrained_model_cfg
+
+    if not tokenizer:
+        tokenizer = get_bert_tokenizer(pretrained_model_cfg, do_lower_case=cfg.do_lower_case)
+        if cfg.special_tokens:
+            _add_special_tokens(tokenizer, cfg.special_tokens)
+
+    return BertTensorizer(tokenizer, sequence_length)
+   
 
 def get_bert_tensorizer(cfg, tokenizer=None):
     sequence_length = cfg.encoder.sequence_length
@@ -448,6 +460,27 @@ class BertTensorizer(Tensorizer):
 
     def get_token_id(self, token: str) -> int:
         return self.tokenizer.vocab[token]
+
+
+class RelationalBertTensorizer(BertTensorizer):
+    def __init__(self, tokenizer: BertTokenizer, max_length: int, pad_to_max: bool = True):
+        super().__init__(tokenizer, max_length, pad_to_max)
+    
+    def text_to_column_ids(
+        self,
+        text: str,
+        title: str = None,
+        add_special_tokens: bool = True,
+        apply_max_len: bool = True,
+    ):
+        text = text.strip()
+
+        if "[C_SEP]" not in text:
+            seq_len = self.max_length
+            return torch.zeros(seq_len)
+        
+            
+
 
 
 class RobertaTensorizer(BertTensorizer):
