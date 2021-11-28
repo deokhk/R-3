@@ -76,7 +76,7 @@ def main():
         linearized_column, psg_list = gen_table_passages(table, tokenizer)
         for psg in psg_list:
             psg = tokenizer.decode(tokenizer.convert_tokens_to_ids(psg))
-            tsv_writer.writerow([psg_count, linearized_column + "[SEP]" + psg, table["documentTitle"]])
+            tsv_writer.writerow([psg_count, linearized_column + " [SEP] " + psg, table["documentTitle"]])
             psg_count+=1
         
         count+=1
