@@ -3,6 +3,7 @@ import pickle
 import csv 
 from transformers.tokenization_bert import BertTokenizer
 from tqdm import tqdm
+from ..model.DPR.dpr.data.qa_validation import answer_count
 
 def filter_table(table_list):
     """
@@ -247,6 +248,62 @@ def gen_table_passages(table, tokenizer):
                 segment_ids_list.append(segment_ids_for_schema + [1 for i in range(remainder)])
     return (linearized_column, psg_list, column_ids_list, row_ids_list, segment_ids_list)
 
+def generate_retrieval_data_without_hn(interactions, tokenizer, type):
+    """
+    Generate table retrieval data, without hard negatives.
+    Return: 
+    [
+        {
+            "question": "....",
+            "answers": ["...", "...", "..."],
+            "positive_ctxs": [{
+                "title": "...",
+                "text": "...."
+            }]
+        },
+        ...
+    ]
+    """
+    print("==== Now Generating table retrieval dataset without hard negatives. ====")
+
+    tb_retrieval_data = []
+    count = 0
+    for it_object in tqdm(interactions):
+        data = {}
+        table = it_object["table"]
+        title = table["documentTitle"]
+        question = it_object["questions"][0]["originalText"]
+        answers = it_object["questions"][0]["answer"]["answerTexts"]
+        
+        data["question"] = question
+        data["answers"] = answers
+        
+        positive_context = {}
+        linearized_column, psg_list, _, _, _  = gen_table_passages(table, tokenizer)
+        gold_psg = ""
+        max_answer_num = 0
+        for psg in psg_list:
+            psg = tokenizer.decode(tokenizer.convert_tokens_to_ids(psg))
+            num_answers_found = answer_count(answers, psg, tokenizer)
+            if num_answers_found > max_answer_num:
+                max_answer_num = num_answers_found
+                gold_psg = psg
+        
+        gold_text = linearized_column + " [SEP] " + gold_psg
+        positive_context["title"] = title
+        positive_context["text"] = gold_text
+        data["positive_ctxs"] = [positive_context]
+        tb_retrieval_data.append(data)
+
+    if type == "train":
+        with open("table_train.json", "w") as f:
+            json.dump(tb_retrieval_data, f)
+    elif type == "dev":
+        with open("table_dev.json", "w") as f:
+            json.dump(tb_retrieval_data, f)
+    print("Saving of retrieval data done.")
+    print(f"Number of q/a pairs: Train: {len(tb_retrieval_data)}")
+
 def main():
     table_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/tables/tables.jsonl"
     interaction_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions"
@@ -309,4 +366,10 @@ def main():
     print(f"Saved segment ids for passages")
 
     f.close()
+    generate_retrieval_data_without_hn(table_train_interactions, tokenizer, "train")
+    generate_retrieval_data_without_hn(table_dev_interactions, tokenizer, "dev")
+
+if __name__ == "__main__":
+    main()
+    
 
