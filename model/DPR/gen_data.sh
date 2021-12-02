@@ -7,6 +7,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=16
 #SBATCH --cpus-per-task=4
+#SBATCH --mem=400G
 
 srun -l /bin/hostname
 srun -l /bin/pwd
@@ -15,7 +16,7 @@ srun -l /bin/date
 module purge 
 
 date
-/home/deokhk/elasticsearch-7.15.0/bin/elasticsearch
-python gen_hard_negative.py
+
+python generate_table_passages_renew.py
 
 date

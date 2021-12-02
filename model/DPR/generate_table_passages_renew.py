@@ -303,16 +303,18 @@ def generate_retrieval_data_without_hn(interactions, tokenizer, type, table_pass
         gold_text = linearized_column + " [SEP] " + gold_psg
         positive_context["title"] = title
         positive_context["text"] = gold_text
+        is_gold_exist = True
         if gold_text.strip() in text_to_psg_id:
             positive_context["passage_id"] = text_to_psg_id[gold_text.strip()]
+            if int(positive_context["passage_id"]) > 21015324:
+                positive_context["origin"] = "table"
+            else:
+                positive_context["origin"] = "text"
         else:
-            raise KeyError("Gold passage does not exist in the passage pools.")
-        if positive_context["passage_id"] > 21015324:
-            positive_context["origin"] = "table"
-        else:
-            positive_context["origin"] = "text"
+            is_gold_exist = False
         data["positive_ctxs"] = [positive_context]
-        tb_retrieval_data.append(data)
+        if is_gold_exist:
+            tb_retrieval_data.append(data)
 
     if type == "train":
         with open("table_train.json", "w") as f:
@@ -328,7 +330,7 @@ def main():
     interaction_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions"
     with open(table_loc, 'r') as tb_file:
         tb_list = list(tb_file)
-    filter_table(tb_list)
+    # filter_table(tb_list)
     filtered_table_loc = "/home/deokhk/research/MultiQA/script/filtered_table.json"
     with open(filtered_table_loc, 'r') as data:
         filtered_tables = json.load(data)
