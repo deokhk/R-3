@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -J new_data_checkpoint_DPR_baseline # job name
+#SBATCH -J new_data_scratch_DPR_baseline # job name
 #SBATCH -o sbatch_output_log/output_%x_%j.out # standard output and error log
 #SBATCH -p 4A100 # queue name or partiton name
 #SBATCH -q 4A100

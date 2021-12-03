@@ -23,7 +23,7 @@ from torch import nn
 from dpr.data.biencoder_data import BiEncoderSample
 from dpr.utils.data_utils import Tensorizer
 from dpr.utils.model_utils import CheckpointState
-from biencoder import dot_product_scores, cosine_scores, _select_span_with_token, BiEncoderNllLoss
+from dpr.models.biencoder import dot_product_scores, cosine_scores, _select_span_with_token, BiEncoderNllLoss
 
 logger = logging.getLogger(__name__)
 
