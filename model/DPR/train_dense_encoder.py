@@ -202,7 +202,7 @@ class BiEncoderTrainer(object):
 
         if cfg.local_rank in [-1, 0]:
             logger.info("Training finished. Best validation checkpoint %s", self.best_cp_name)
-
+            
     def validate_and_save(self, epoch: int, iteration: int, scheduler):
         cfg = self.cfg
         # for distributed mode, save checkpoint for only one process
@@ -776,7 +776,6 @@ def main(cfg: DictConfig):
         trainer.validate_average_rank()
     else:
         logger.warning("Neither train_file or (model_file & dev_file) parameters are specified. Nothing to do.")
-
 
 if __name__ == "__main__":
     logger.info("Sys.argv: %s", sys.argv)

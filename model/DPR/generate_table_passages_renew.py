@@ -317,10 +317,10 @@ def generate_retrieval_data_without_hn(interactions, tokenizer, type, table_pass
             tb_retrieval_data.append(data)
 
     if type == "train":
-        with open("table_train.json", "w") as f:
+        with open("table_train_without_special_token.json", "w") as f:
             json.dump(tb_retrieval_data, f)
     elif type == "dev":
-        with open("table_dev.json", "w") as f:
+        with open("table_dev_without_special_token.json", "w") as f:
             json.dump(tb_retrieval_data, f)
     print("Saving of retrieval data done.")
     print(f"Number of q/a pairs in {type} : {len(tb_retrieval_data)}")
@@ -346,10 +346,10 @@ def main():
     # Generate table passages & column/row/segment ids for each passage
     
     print("Now generating table passages.")
-    special_tokens = ["[C_SEP]", "[V_SEP]", "[R_SEP]"]
+    # special_tokens = ["[C_SEP]", "[V_SEP]", "[R_SEP]"]
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
-    _add_special_tokens(tokenizer, special_tokens)
-    """
+    # _add_special_tokens(tokenizer, special_tokens)
+
     count = 0
     psg_count = 21015325 # Since the last number of wikipedia split is 21015324
 
@@ -374,21 +374,21 @@ def main():
     print(f"Total number of table linearized :{count}")
     print(f"Total passage created : {psg_count-21015325}")
 
-    with open("column_ids_list.pickle", "wb") as fw:
+    with open("column_ids_list_without_special_token.pickle", "wb") as fw:
         pickle.dump(total_column_ids_list, fw)
     print(f"Saved column ids for passages")
 
-    with open("row_ids_list.pickle", "wb") as fw:
+    with open("row_ids_list_without_special_token.pickle", "wb") as fw:
         pickle.dump(total_row_ids_list, fw)
     print(f"Saved row ids for passages")
 
-    with open("segment_ids_list.pickle", "wb") as fw:
+    with open("segment_ids_list_without_special_token.pickle", "wb") as fw:
         pickle.dump(total_segment_ids_list, fw)
     print(f"Saved segment ids for passages")
 
     f.close()
-    """
-    table_passage_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100_new.tsv"
+
+    table_passage_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100_without_special_token.tsv"
     generate_retrieval_data_without_hn(table_train_interactions, tokenizer, "train", table_passage_loc)
     generate_retrieval_data_without_hn(table_dev_interactions, tokenizer, "dev", table_passage_loc)
 
