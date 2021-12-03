@@ -48,3 +48,6 @@ multi_q_encoder: False
 
 # set to True to add relational embeddings when trainining the encoders.
 use_relational_embedding: False
+
+# set for wandb group name
+experiment_name: 

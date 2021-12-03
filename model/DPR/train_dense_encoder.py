@@ -16,6 +16,7 @@ import os
 import random
 import sys
 import time
+import wandb
 from typing import Tuple
 
 import hydra
@@ -152,7 +153,7 @@ class BiEncoderTrainer(object):
             rank=rank,
         )
     @slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
-    def run_train(self):
+    def run_train(self, run):
         cfg = self.cfg
         train_iterator = self.get_data_iterator(
             cfg.train.batch_size,
@@ -197,7 +198,7 @@ class BiEncoderTrainer(object):
 
         for epoch in range(self.start_epoch, int(cfg.train.num_train_epochs)):
             logger.info("***** Epoch %d *****", epoch)
-            self._train_epoch(scheduler, epoch, eval_step, train_iterator)
+            self._train_epoch(scheduler, epoch, eval_step, train_iterator, run)
 
         if cfg.local_rank in [-1, 0]:
             logger.info("Training finished. Best validation checkpoint %s", self.best_cp_name)
@@ -438,6 +439,7 @@ class BiEncoderTrainer(object):
         epoch: int,
         eval_step: int,
         train_data_iterator: MultiSetDataIterator,
+        run
     ):
 
         cfg = self.cfg
@@ -556,7 +558,8 @@ class BiEncoderTrainer(object):
         epoch_loss = (epoch_loss / epoch_batches) if epoch_batches > 0 else 0
         logger.info("Av Loss per epoch=%f", epoch_loss)
         logger.info("epoch total correct predictions=%d", epoch_correct_predictions)
-
+        if cfg.local_rank == 0:
+            run.log({"epochs": epoch, "epoch_loss": epoch_loss})
     def _save_checkpoint(self, scheduler, epoch: int, offset: int) -> str:
         cfg = self.cfg
         model_to_save = get_model_obj(self.biencoder)
@@ -759,11 +762,14 @@ def main(cfg: DictConfig):
     if cfg.local_rank in [-1, 0]:
         logger.info("CFG (after gpu  configuration):")
         logger.info("%s", OmegaConf.to_yaml(cfg))
-
+    run = None
+    # Initialize wandb run
+    if cfg.local_rank == 0:
+        run = wandb.init(project="MultiQA", entity="deokhk", name=cfg.experiment_name)
     trainer = BiEncoderTrainer(cfg)
 
     if cfg.train_datasets and len(cfg.train_datasets) > 0:
-        trainer.run_train()
+        trainer.run_train(run)
     elif cfg.model_file and cfg.dev_datasets:
         logger.info("No train files are specified. Run 2 types of validation for specified model file")
         trainer.validate_nll()
