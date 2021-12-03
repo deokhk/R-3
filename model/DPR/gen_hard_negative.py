@@ -36,7 +36,7 @@ def main(args):
 
     es = Elasticsearch(timeout=30, max_retries=10, retry_on_timeout=True)
     passage_loc = args.passage_loc
-    # bulk(es, gen_passages(passage_loc)) # Index table passages. Wait a while till 22,271,054 passages are indexed..
+    # bulk(es, gen_passages(passage_loc)) # Index table passages. Wait a while till all passages are indexed..
 
     with open(args.train_table_without_hn, "r") as f:
         train_table_without_hn = json.load(f)
@@ -73,20 +73,18 @@ def main(args):
         hn_passage = ""
         title = ""
         for passage in matched_passages:
-            found = True
             passage_content = passage["_source"]["passage"]
             answer_in_content = has_answer(answers, passage_content, tokenizer, "string")
             if answer_in_content:
-                found = False
-                break
-            if found == True:
-                x = passage_content.split("[SEP]", maxsplit=1)
-                title = x[0].strip()
-                hn_passage = x[1].strip()
-                break
+                continue
+
+            x = passage_content.split("[SEP]", maxsplit=1)
+            title = x[0].strip()
+            hn_passage = x[1].strip()
+            break
+
         updated_qa_pair = qa_pair
-        is_hn_exist = True
-        if hn_passage.strip() in text_to_psg_id:
+        if hn_passage in text_to_psg_id:
             pid = text_to_psg_id[hn_passage.strip()]
             if int(pid) > 21015324:
                 origin = "table"
@@ -95,13 +93,11 @@ def main(args):
 
             hn_ctxs = [{"title": title, "text": hn_passage, "passage_id": pid, "origin": origin}]
             updated_qa_pair["hard_negative_ctxs"] = hn_ctxs
+            updated_train.append(updated_qa_pair)
         else:
-            is_hn_exist = False
-        if is_hn_exist == False:
-            print("Failed to find hard negative passages!")
             cnt+=1
-            continue
-        updated_train.append(updated_qa_pair)
+            print(f"Failed to find hard negative passages!. Total failed : {cnt}")
+
 
     print("Generate a hard negative passage to train data completed!")
     print(f"Total :{len(train_text_table)}, not generated :{cnt}")
@@ -135,21 +131,18 @@ def main(args):
         hn_passage = ""
         title = ""
         for passage in matched_passages:
-            found = True
             passage_content = passage["_source"]["passage"]
             answer_in_content = has_answer(answers, passage_content, tokenizer, "string")
             if answer_in_content:
-                found = False
-                break
-            if found == True:
-                x = passage_content.split("[SEP]", maxsplit=1)
-                title = x[0].strip()
-                hn_passage = x[1].strip()
-                break
+                continue
+
+            x = passage_content.split("[SEP]", maxsplit=1)
+            title = x[0].strip()
+            hn_passage = x[1].strip()
+            break
         
         updated_qa_pair = qa_pair
-        is_hn_exist = True
-        if hn_passage.strip() in text_to_psg_id:
+        if hn_passage in text_to_psg_id:
             pid = text_to_psg_id[hn_passage.strip()]
             if int(pid) > 21015324:
                 origin = "table"
@@ -158,13 +151,10 @@ def main(args):
 
             hn_ctxs = [{"title": title, "text": hn_passage, "passage_id": pid, "origin": origin}]
             updated_qa_pair["hard_negative_ctxs"] = hn_ctxs
+            updated_table_dev.append(updated_qa_pair)
         else:
-            is_hn_exist = False
-        if is_hn_exist == False:
-            print("Failed to find hard negative passages!")
             cnt+=1
-            continue
-        updated_table_dev.append(updated_qa_pair)
+            print(f"Failed to find hard negative passages!. Total failed : {cnt}")
 
     with open(args.output_path + "nq-dev-text-table.json", "w") as f:
         json.dump(updated_table_dev, f)

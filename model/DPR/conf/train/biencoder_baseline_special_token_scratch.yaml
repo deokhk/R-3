@@ -1,6 +1,6 @@
 # @package _group_
 
-batch_size: 4
+batch_size: 16
 dev_batch_size: 64
 adam_eps: 1e-8
 adam_betas: (0.9, 0.999)
@@ -14,7 +14,7 @@ learning_rate: 2e-5
 warmup_steps: 1237
 
 # Number of updates steps to accumulate before performing a backward/update pass.
-gradient_accumulation_steps: 4
+gradient_accumulation_steps: 2
 
 # Total number of training epochs to perform.
 num_train_epochs: 40
