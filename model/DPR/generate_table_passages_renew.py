@@ -255,7 +255,7 @@ def gen_table_passages(table, tokenizer):
     value_replacements = {"[V_SEP]":",","[R_SEP]":"[SEP]"}
     replacer = value_replacements.get
     for idx, psg in enumerate(psg_list):
-        psg_list[idx] = [replacer(elem,elem) for elem in psg_list]
+        psg_list[idx] = [replacer(elem,elem) for elem in psg]
     return (linearized_column, psg_list, column_ids_list, row_ids_list, segment_ids_list)
 
 def generate_retrieval_data_without_hn(interactions, tokenizer, type, table_passage_loc):
@@ -349,11 +349,11 @@ def main():
     table_train_interactions, table_dev_interactions = generate_table_qa_interactions(filtered_interactions, dpr_train_loc, dpr_dev_loc, nq_open_train_loc, nq_open_dev_loc)
 
     # Generate table passages & column/row/segment ids for each passage
-    
+    # This additional token is required to create temporary tokenized passage for row/column/segment id creations
     print("Now generating table passages.")
-    # special_tokens = ["[C_SEP]", "[V_SEP]", "[R_SEP]"]
+    special_tokens = ["[C_SEP]", "[V_SEP]", "[R_SEP]"]
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
-    # _add_special_tokens(tokenizer, special_tokens)
+    _add_special_tokens(tokenizer, special_tokens)
 
     count = 0
     psg_count = 21015325 # Since the last number of wikipedia split is 21015324
