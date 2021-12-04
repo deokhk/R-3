@@ -160,6 +160,8 @@ def gen_table_passages(table, tokenizer):
     Also, generate column, row ids and segment_ids for each passage (NOTE: passage with form "columns [SEP] values")
     Return: (linearized_column, psg_list, column_ids_list, row_ids_list, segment_id_list)
     """
+    # 우선 [C_SEP], [V_SEP], [R_SEP]과 같은 special token을 끼워넣은 상태로 column/row/segment id를 생성하고
+    # 추후 위 special token들을 [C_SEP], [V_SEP]의 경우 ","로, [R_SEP]의 경우 "\n" 으로 변화시키자.
     columns =[]
     for i, column in enumerate(table["columns"]):
         columns.append(column["text"])
@@ -247,6 +249,13 @@ def gen_table_passages(table, tokenizer):
                 column_ids_list.append(column_ids_for_schema + value_column_ids[(i+1)*100:(i+1)*100 + remainder])
                 row_ids_list.append(row_ids_for_schema + value_row_ids[(i+1)*100:(i+1)*100 + remainder])
                 segment_ids_list.append(segment_ids_for_schema + [1 for i in range(remainder)])
+    # Replace [C_SEP] to ","
+    linearized_column = linearized_column.replace("[C_SEP]", ",")
+    # Replace [V_SEP] to "," and [R_SEP] to "[SEP]"
+    value_replacements = {"[V_SEP]":",","[R_SEP]":"[SEP]"}
+    replacer = value_replacements.get
+    for idx, psg in enumerate(psg_list):
+        psg_list[idx] = [replacer(elem,elem) for elem in psg_list]
     return (linearized_column, psg_list, column_ids_list, row_ids_list, segment_ids_list)
 
 def generate_retrieval_data_without_hn(interactions, tokenizer, type, table_passage_loc):
@@ -306,10 +315,6 @@ def generate_retrieval_data_without_hn(interactions, tokenizer, type, table_pass
         is_gold_exist = True
         if gold_text.strip() in text_to_psg_id:
             positive_context["passage_id"] = text_to_psg_id[gold_text.strip()]
-            if int(positive_context["passage_id"]) > 21015324:
-                positive_context["origin"] = "table"
-            else:
-                positive_context["origin"] = "text"
         else:
             is_gold_exist = False
         data["positive_ctxs"] = [positive_context]
@@ -353,7 +358,7 @@ def main():
     count = 0
     psg_count = 21015325 # Since the last number of wikipedia split is 21015324
 
-    f = open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100.tsv", "wt")
+    f = open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/table_w100_without_special_token.tsv", "wt")
     tsv_writer = csv.writer(f, delimiter='\t')
 
     total_column_ids_list = []
