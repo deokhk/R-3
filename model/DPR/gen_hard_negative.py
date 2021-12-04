@@ -102,7 +102,7 @@ def main(args):
     print("Generate a hard negative passage to train data completed!")
     print(f"Total :{len(train_text_table)}, not generated :{cnt}")
 
-    with open(args.output_path + "nq-train-text-table.json", "w") as f:
+    with open(args.output_path + "nq-train-text-table_without_special_token.json", "w") as f:
         json.dump(updated_train, f)
 
     print("Now generating a hard negative passages for dev data.")
@@ -156,7 +156,7 @@ def main(args):
             cnt+=1
             print(f"Failed to find hard negative passages!. Total failed : {cnt}")
 
-    with open(args.output_path + "nq-dev-text-table.json", "w") as f:
+    with open(args.output_path + "nq-dev-text-table_without_special_token.json", "w") as f:
         json.dump(updated_table_dev, f)
 
     print("Generate a hard negative passage to dev data completed!")
@@ -164,8 +164,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Adds hard negative to table training data.")
-    parser.add_argument('--train_table_without_hn', help='path to input table training data file', default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_train.json')
-    parser.add_argument('--dev_table_without_hn', help='path to input table dev data file', default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_dev.json')
+    parser.add_argument('--train_table_without_hn', help='path to input table training data file', default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_train_without_special_token.json')
+    parser.add_argument('--dev_table_without_hn', help='path to input table dev data file', default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_dev_without_special_token.json')
     parser.add_argument('--train_text', help='path to nq-train.json', default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train.json')
     parser.add_argument('--dev_text', help='path to nq-dev.json', default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev.json')
     parser.add_argument('--output_path',  default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/', help='path to output directory where augmented training/dev data will be added')
