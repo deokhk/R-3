@@ -100,7 +100,11 @@ def main(args):
     print("Generate a hard negative passage to train data completed!")
     print(f"Total :{len(train_text_table)}, not generated :{cnt}")
 
+<<<<<<< HEAD
     with open(args.output_path + "nq-train-text-table-without-special.json", "w") as f:
+=======
+    with open(args.output_path + "nq-train-text-table_without_special_token.json", "w") as f:
+>>>>>>> 098f1e2e96115a308ed9227acd946b08bf97f687
         json.dump(updated_train, f)
 
     print("Now generating a hard negative passages for dev data.")
@@ -154,7 +158,11 @@ def main(args):
             cnt+=1
             print(f"Failed to find hard negative passages!. Total failed : {cnt}")
 
+<<<<<<< HEAD
     with open(args.output_path + "nq-dev-text-table-without-special.json", "w") as f:
+=======
+    with open(args.output_path + "nq-dev-text-table_without_special_token.json", "w") as f:
+>>>>>>> 098f1e2e96115a308ed9227acd946b08bf97f687
         json.dump(updated_table_dev, f)
 
     print("Generate a hard negative passage to dev data completed!")
