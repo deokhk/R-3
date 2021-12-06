@@ -17,7 +17,5 @@ module purge
 
 date
 
-/home/deokhk/elasticsearch-7.15.0/bin/elasticsearch
-python gen_hard_negative.py
-
+python generate_table_passages_renew.py
 date

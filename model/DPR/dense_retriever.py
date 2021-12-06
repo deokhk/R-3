@@ -274,7 +274,7 @@ def main(cfg: DictConfig):
     saved_state = load_states_from_checkpoint(cfg.model_file)
     set_cfg_params_from_state(saved_state.encoder_params, cfg)
 
-    tensorizer, encoder, _ = init_biencoder_components(cfg.encoder.encoder_model_type, cfg, inference_only=True)
+    tensorizer, encoder, _ = init_biencoder_components(cfg.encoder.encoder_model_type, cfg.use_relational_embedding, cfg, inference_only=True)
 
     encoder_path = cfg.encoder_path
     if encoder_path:

@@ -8,6 +8,10 @@ nq_train_with_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
   file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train-text-table.json"
 
+nq_train_with_table_new_linearization:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train-text-table-without-special.json"
+
 nq_train_hn1:
   _target_: dpr.data.biencoder_data.JsonQADataset
   file: data.retriever.nq-adv-hn-train
@@ -19,6 +23,10 @@ nq_dev:
 nq_dev_with_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
   file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev-text-table.json"
+
+nq_dev_with_table_new_linearization:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev-text-table-without-special.json"
 
 trivia_train:
   _target_: dpr.data.biencoder_data.JsonQADataset

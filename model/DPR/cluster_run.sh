@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#SBATCH -J new_data_scratch_DPR_baseline # job name
+#SBATCH -J eval_new_lin_retrieval # job name
 #SBATCH -o sbatch_output_log/output_%x_%j.out # standard output and error log
-#SBATCH -p 4A100 # queue name or partiton name
-#SBATCH -q 4A100
+#SBATCH -p A100 # queue name or partiton name
 #SBATCH -t 72:00:00 # Run time (hh:mm:ss)
-#SBATCH  --gres=gpu:4
+#SBATCH  --gres=gpu:1
 #SBATCH  --nodes=1
-#SBATCH  --ntasks=1
-#SBATCH  --tasks-per-node=1
+#SBATCH  --ntasks=4
+#SBATCH  --cpus-per-task=4
+#SBATCH  --mem=400G
 
 srun -l /bin/hostname
 srun -l /bin/pwd
@@ -18,6 +18,6 @@ module purge
 
 date
 
-sh train_plain_encoder_with_table_special_token.sh
+sh eval_retrieval_chkpt.sh
 
 date

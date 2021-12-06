@@ -96,7 +96,7 @@ def main(cfg: DictConfig):
     logger.info("CFG:")
     logger.info("%s", OmegaConf.to_yaml(cfg))
 
-    tensorizer, encoder, _ = init_biencoder_components(cfg.encoder.encoder_model_type, cfg, inference_only=True)
+    tensorizer, encoder, _ = init_biencoder_components(cfg.encoder.encoder_model_type, cfg.use_relational_embedding, cfg, inference_only=True)
 
     encoder = encoder.ctx_model if cfg.encoder_type == "ctx" else encoder.question_model
 
