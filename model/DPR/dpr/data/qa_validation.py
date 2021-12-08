@@ -99,7 +99,6 @@ def check_answer(questions_answers_docs, tokenizer, match_type) -> List[bool]:
         hits.append(answer_found)
     return hits
 
-
 def has_answer(answers, text, tokenizer, match_type) -> bool:
     """Check if a document contains an answer string.
     If `match_type` is string, token matching is done between the text and answer.
@@ -109,12 +108,11 @@ def has_answer(answers, text, tokenizer, match_type) -> bool:
 
     if match_type == "string":
         # Answer is a list of possible strings
-        text = tokenizer.tokenize(text).words(uncased=True)
+        text = tokenizer.tokenize(text)
 
         for single_answer in answers:
             single_answer = _normalize(single_answer)
             single_answer = tokenizer.tokenize(single_answer)
-            single_answer = single_answer.words(uncased=True)
 
             for i in range(0, len(text) - len(single_answer) + 1):
                 if single_answer == text[i : i + len(single_answer)]:
@@ -138,7 +136,6 @@ def answer_count(answers, text, tokenizer) -> bool:
     for single_answer in answers:
         single_answer = _normalize(single_answer)
         single_answer = tokenizer.tokenize(single_answer)
-        single_answer = single_answer.words(uncased=True)
 
         for i in range(0, len(text) - len(single_answer) + 1):
             if single_answer == text[i : i + len(single_answer)]:

@@ -14,7 +14,7 @@ nq_train_with_table:
 
 nq_train_with_table_csv:
   _target_: dpr.data.retriever_data.CsvQASrc
-  file: "/home/deokhk/research/MultiQA/model/DPR/downloads/data/retriever/qas/nq-train-text-table.csv"
+  file: "/home/deokhk/research/MultiQA/model/DPR/downloads/data/retriever/qas/nq-train-text-table-without-special.csv"
 
 nq_dev:
   _target_: dpr.data.retriever_data.CsvQASrc
@@ -26,7 +26,7 @@ nq_dev_with_table:
 
 nq_dev_with_table_csv:
   _target_: dpr.data.retriever_data.CsvQASrc
-  file: "/home/deokhk/research/MultiQA/model/DPR/downloads/data/retriever/qas/nq-dev-text-table.csv"
+  file: "/home/deokhk/research/MultiQA/model/DPR/downloads/data/retriever/qas/nq-train-text-table-without-special.csv"
 
 trivia_test:
   _target_: dpr.data.retriever_data.CsvQASrc
