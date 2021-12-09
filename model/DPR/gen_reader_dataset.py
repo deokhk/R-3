@@ -29,16 +29,16 @@ def prepare_datas(context_file, category):
     outputs = Parallel(n_jobs=-1, verbose=10)(delayed(prepare_single_qapair)(qapair) for qapair in tqdm(context_file))
     qa_pairs = [e for e in outputs]
 
-    file = os.getcwd() + f"/reader_dataset_nq_open/{category}.json"
+    file = os.getcwd() + f"/reader_dataset/{category}.json"
     pathlib.Path(os.path.dirname(file)).mkdir(parents=True, exist_ok=True)
     logger.info(f"Writing results to {file}")
     with open(file, 'w') as f:
         ujson.dump(qa_pairs, f)
 
 def main():
-    train_context_path = "/home/deokhk/research/MultiQA/model/DPR/retrieval_eval_output/context_for_reader_nq_open/c_reader_train.json"
-    dev_context_path = "/home/deokhk/research/MultiQA/model/DPR/retrieval_eval_output/context_for_reader_nq_open/c_reader_dev.json"
-    test_context_path = "/home/deokhk/research/MultiQA/model/DPR/retrieval_eval_output/context_for_reader_nq_open/c_reader_test.json"
+    train_context_path = "/home/deokhk/research/MultiQA/model/DPR/retrieval_eval_output/context_for_reader/c_reader_train.json"
+    dev_context_path = "/home/deokhk/research/MultiQA/model/DPR/retrieval_eval_output/context_for_reader/c_reader_dev.json"
+    test_context_path = "/home/deokhk/research/MultiQA/model/DPR/retrieval_eval_output/context_for_reader/c_reader_test.json"
 
     paths = [train_context_path, dev_context_path, test_context_path]
     categories = ["train", "dev", "test"]

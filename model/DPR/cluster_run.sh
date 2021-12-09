@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -J gen_reader_dataset # job name
+#SBATCH -J gen_reader_dataset_for_dev # job name
 #SBATCH -o sbatch_output_log/output_%x_%j.out # standard output and error log
 #SBATCH -p A100 # queue name or partiton name
 #SBATCH -t 72:00:00 # Run time (hh:mm:ss)
@@ -18,6 +18,6 @@ module purge
 
 date
 
-sh gen_context_for_reader.sh
+sh tmp.sh
 
 date

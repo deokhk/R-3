@@ -108,6 +108,36 @@ def has_answer(answers, text, tokenizer, match_type) -> bool:
 
     if match_type == "string":
         # Answer is a list of possible strings
+        text = tokenizer.tokenize(text).words(uncased=True)
+
+        for single_answer in answers:
+            single_answer = _normalize(single_answer)
+            single_answer = tokenizer.tokenize(single_answer)
+            single_answer = single_answer.words(uncased=True)
+
+            for i in range(0, len(text) - len(single_answer) + 1):
+                if single_answer == text[i : i + len(single_answer)]:
+                    return True
+
+    elif match_type == "regex":
+        # Answer is a regex
+        for single_answer in answers:
+            single_answer = _normalize(single_answer)
+            if regex_match(text, single_answer):
+                return True
+    return False
+
+def has_answer_custom_tok(answers, text, tokenizer, match_type) -> bool:
+    """
+    This function is for custom tokenizer defined.
+    Check if a document contains an answer string.
+    If `match_type` is string, token matching is done between the text and answer.
+    If `match_type` is regex, we search the whole text with the regex.
+    """
+    text = _normalize(text)
+
+    if match_type == "string":
+        # Answer is a list of possible strings
         text = tokenizer.tokenize(text)
 
         for single_answer in answers:
@@ -125,6 +155,7 @@ def has_answer(answers, text, tokenizer, match_type) -> bool:
             if regex_match(text, single_answer):
                 return True
     return False
+
 
 def answer_count(answers, text, tokenizer) -> bool:
     """Count the number of answers contained in the given text.

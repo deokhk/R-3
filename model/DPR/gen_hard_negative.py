@@ -6,7 +6,7 @@ import json
 import argparse
 import os
 from tqdm import tqdm
-from dpr.data.qa_validation import has_answer
+from dpr.data.qa_validation import has_answer_custom_tok
 from transformers.tokenization_bert import BertTokenizer
 from generate_table_passages_renew import _add_special_tokens
 
@@ -72,7 +72,7 @@ def main(args):
         title = ""
         for passage in matched_passages:
             passage_content = passage["_source"]["passage"]
-            answer_in_content = has_answer(answers, passage_content, tokenizer, "string")
+            answer_in_content = has_answer_custom_tok(answers, passage_content, tokenizer, "string")
             if answer_in_content:
                 continue
 
@@ -126,7 +126,7 @@ def main(args):
         title = ""
         for passage in matched_passages:
             passage_content = passage["_source"]["passage"]
-            answer_in_content = has_answer(answers, passage_content, tokenizer, "string")
+            answer_in_content = has_answer_custom_tok(answers, passage_content, tokenizer, "string")
             if answer_in_content:
                 continue
 
