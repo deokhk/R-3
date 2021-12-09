@@ -169,15 +169,17 @@ def gen_table_passages(table, tokenizer):
             columns.append("[C_SEP]")
     linearized_column = linearize_column(columns)
     
+    preceding_title_string = " [CLS] " + table["documentTitle"] + " [SEP] "
     passage_schema_string = linearized_column + " [SEP] "
+    preceding_title = tokenizer.tokenize(preceding_title_string)
     schema = tokenizer.tokenize(passage_schema_string)
     
     value_column_ids = []
     value_row_ids = []
     linearized_value = ""
-    segment_ids_for_schema = [0 for i in range(len(schema))]
-    row_ids_for_schema = [0 for i in range(len(schema))]
-    column_ids_for_schema = []
+    segment_ids_for_schema = [0 for i in range(len(preceding_title))] + [1 for i in range(len(schema))]
+    row_ids_for_schema = [0 for i in range(len(preceding_title+schema))]
+    column_ids_for_schema = [0 for i in range(len(preceding_title))]
     schema_column_id = 1
     
     for tok in schema:
@@ -189,7 +191,6 @@ def gen_table_passages(table, tokenizer):
             break
         else:
             column_ids_for_schema.append(schema_column_id)
-    
     
     rows = table["rows"]
     for i, row in enumerate(rows):
@@ -233,22 +234,23 @@ def gen_table_passages(table, tokenizer):
     row_ids_list = []
     segment_ids_list = []
     
+    # In case of segment_id, we add [1] at the end for [SEP] token at the end of the input feeded to the model.
     if quotient == 0:
         psg_list.append(linearized_value[0:remainder])
         column_ids_list.append(column_ids_for_schema + value_column_ids[0:remainder])
         row_ids_list.append(row_ids_for_schema + value_row_ids[0:remainder])
-        segment_ids_list.append(segment_ids_for_schema + [1 for i in range(remainder)])
+        segment_ids_list.append(segment_ids_for_schema + [1 for i in range(remainder)] +[1])
     else:
         for i in range(quotient+1):
             psg_list.append(linearized_value[i*100:(i+1)*100])
             column_ids_list.append(column_ids_for_schema + value_column_ids[i*100:(i+1)*100])
             row_ids_list.append(row_ids_for_schema + value_row_ids[i*100:(i+1)*100])
-            segment_ids_list.append(segment_ids_for_schema + [1 for i in range(100)])
+            segment_ids_list.append(segment_ids_for_schema + [1 for i in range(100)] +[1])
             if i == quotient and remainder:
                 psg_list.append(linearized_value[(i+1)*100:(i+1)*100 + remainder])
                 column_ids_list.append(column_ids_for_schema + value_column_ids[(i+1)*100:(i+1)*100 + remainder])
                 row_ids_list.append(row_ids_for_schema + value_row_ids[(i+1)*100:(i+1)*100 + remainder])
-                segment_ids_list.append(segment_ids_for_schema + [1 for i in range(remainder)])
+                segment_ids_list.append(segment_ids_for_schema + [1 for i in range(remainder)] +[1])
     # Replace [C_SEP] to ","
     linearized_column = linearized_column.replace("[C_SEP]", ",")
     # Replace [V_SEP] to "," and [R_SEP] to "[SEP]"
