@@ -64,12 +64,12 @@ class BiEncoderTrainer(object):
     and dense_retriever.py CLI tools.
     """
 
-    def __init__(self, cfg: DictConfig):
+    def __init__(self, cfg: DictConfig, use_relational_embedding: bool):
         self.shard_id = cfg.local_rank if cfg.local_rank != -1 else 0
         self.distributed_factor = cfg.distributed_world_size or 1
 
         logger.info("***** Initializing components for training *****")
-        if cfg.use_relational_embedding == True:
+        if use_relational_embedding == True:
             logger.info("***** Training Relational-aware DPR *****")
         else:
             logger.info("***** Training plain DPR *****")
@@ -81,7 +81,7 @@ class BiEncoderTrainer(object):
             saved_state = load_states_from_checkpoint(model_file)
             set_cfg_params_from_state(saved_state.encoder_params, cfg)
             
-        tensorizer, model, optimizer = init_biencoder_components(cfg.encoder.encoder_model_type, cfg.use_relational_embedding, cfg)
+        tensorizer, model, optimizer = init_biencoder_components(cfg.encoder.encoder_model_type, use_relational_embedding, cfg)
 
         model, optimizer = setup_for_distributed_mode(
             model,
@@ -104,7 +104,14 @@ class BiEncoderTrainer(object):
         self.ds_cfg = BiencoderDatasetsCfg(cfg)
 
         if saved_state:
-            self._load_saved_state(saved_state)
+            if use_relational_embedding == True:
+                augmented_state = saved_state
+                augmented_state.model_dict["ctx_model.embeddings.column_embeddings.weight"] = torch.randn([51,768])
+                augmented_state.model_dict["ctx_model.embeddings.row_embeddings.weight"] = torch.randn([101,768])
+                self._load_saved_state(augmented_state, use_relational_embedding)
+            else:
+                self._load_saved_state(saved_state, use_relational_embedding)
+
 
         self.dev_iterator = None
 
@@ -577,7 +584,7 @@ class BiEncoderTrainer(object):
         logger.info("Saved checkpoint at %s", cp)
         return cp
 
-    def _load_saved_state(self, saved_state: CheckpointState):
+    def _load_saved_state(self, saved_state: CheckpointState, use_relational_embedding: bool):
         epoch = saved_state.epoch
         # offset is currently ignored since all checkpoints are made after full epochs
         offset = saved_state.offset
@@ -601,7 +608,11 @@ class BiEncoderTrainer(object):
         if not self.cfg.ignore_checkpoint_optimizer:
             if saved_state.optimizer_dict:
                 logger.info("Loading saved optimizer state ...")
-                self.optimizer.load_state_dict(saved_state.optimizer_dict)
+                if use_relational_embedding == True:
+                    # Since structure of model has been changed ,we need to use resetted optimizer state.
+                    pass
+                else:
+                    self.optimizer.load_state_dict(saved_state.optimizer_dict)
 
             if saved_state.scheduler_dict:
                 self.scheduler_state = saved_state.scheduler_dict
@@ -752,6 +763,7 @@ def main(cfg: DictConfig):
                 cfg.train.gradient_accumulation_steps
             )
         )
+    use_relational_embedding = cfg.train.use_relational_embedding
 
     if cfg.output_dir is not None:
         os.makedirs(cfg.output_dir, exist_ok=True)
@@ -766,7 +778,7 @@ def main(cfg: DictConfig):
     # Initialize wandb run
     if cfg.local_rank == 0:
         run = wandb.init(project="MultiQA", entity="deokhk", name=cfg.experiment_name)
-    trainer = BiEncoderTrainer(cfg)
+    trainer = BiEncoderTrainer(cfg, use_relational_embedding)
 
     if cfg.train_datasets and len(cfg.train_datasets) > 0:
         trainer.run_train(run)

@@ -170,7 +170,8 @@ class RelationalBiEncoder(nn.Module):
             ctx_attn_mask, 
             ctx_column_ids,
             ctx_row_ids,
-            self.fix_ctx_encoder
+            self.fix_ctx_encoder,
+            representation_token_pos=representation_token_pos,
         )
 
         return q_pooled_out, ctx_pooled_out
