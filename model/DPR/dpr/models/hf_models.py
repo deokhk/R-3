@@ -187,7 +187,12 @@ def get_optimizer(
     # TODO: optimizer setting 바꾸기. 일단 한번 돌려보고 model에서 embedding layer의 param 어떻게 접근할것인지 확인
     optimizer_grouped_parameters = [
         {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and n in ["ctx_model.embeddings.column_embeddings.weight", "ctx_model.embeddings.row_embeddings.weight"]],
+            "weight_decay": weight_decay,
+            "learning_rate": learning_rate*5
+        },
+        {
+            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and n not in ["ctx_model.embeddings.column_embeddings.weight", "ctx_model.embeddings.row_embeddings.weight"]],
             "weight_decay": weight_decay,
         },
         {
