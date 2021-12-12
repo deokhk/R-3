@@ -20,7 +20,7 @@ import torch.nn.functional as F
 from torch import Tensor as T
 from torch import nn
 
-from dpr.data.biencoder_data import BiEncoderSample
+from dpr.data.biencoder_data import RelationalBiEncoderSample
 from dpr.utils.data_utils import Tensorizer
 from dpr.utils.model_utils import CheckpointState
 from dpr.models.biencoder import dot_product_scores, cosine_scores, _select_span_with_token, BiEncoderNllLoss
@@ -28,7 +28,7 @@ from dpr.models.biencoder import dot_product_scores, cosine_scores, _select_span
 logger = logging.getLogger(__name__)
 
 RelationalBiEncoderBatch = collections.namedtuple(
-    "RelationalBiENcoderInput",
+    "RelationalBiEncoderInput",
     [
         "question_ids",
         "question_segments",
@@ -179,7 +179,7 @@ class RelationalBiEncoder(nn.Module):
     @classmethod
     def create_biencoder_input2(
         cls,
-        samples: List[BiEncoderSample],
+        samples: List[RelationalBiEncoderSample],
         tensorizer: Tensorizer,
         insert_title: bool,
         num_hard_negatives: int = 0,
@@ -191,7 +191,7 @@ class RelationalBiEncoder(nn.Module):
     ) -> RelationalBiEncoderBatch:
         """
         Creates a batch of the relational biencoder training tuple.
-        :param samples: list of BiEncoderSample-s to create the batch for
+        :param samples: list of RelationalBiEncoderSample-s to create the batch for
         :param tensorizer: components to create model input tensors from a text sequence
         :param insert_title: enables title insertion at the beginning of the context sequences
         :param num_hard_negatives: amount of hard negatives per question (taken from samples' pools)

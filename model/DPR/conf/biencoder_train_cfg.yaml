@@ -49,5 +49,8 @@ multi_q_encoder: False
 # set to True to add relational embeddings when trainining the encoders.
 use_relational_embedding: False
 
+# if we use relational embedding, we require column/row file embeddings
+column_file_loc : None
+row_file_loc: None
 # set for wandb group name
 experiment_name: 

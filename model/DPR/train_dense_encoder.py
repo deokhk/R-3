@@ -28,6 +28,7 @@ from torch import nn
 
 from dpr.models import init_biencoder_components
 from dpr.models.biencoder import BiEncoder, BiEncoderNllLoss, BiEncoderBatch
+from dpr.models.relational_biencoder import RelationalBiEncoder, RelationalBiEncoderBatch
 from dpr.options import (
     setup_cfg_gpu,
     set_seed,
@@ -35,7 +36,7 @@ from dpr.options import (
     set_cfg_params_from_state,
     setup_logger,
 )
-from dpr.utils.conf_utils import BiencoderDatasetsCfg
+from dpr.utils.conf_utils import BiencoderDatasetsCfg, RelationalBiencoderDatasetsCfg
 from dpr.utils.data_utils import (
     ShardedDataIterator,
     Tensorizer,
@@ -64,9 +65,13 @@ class BiEncoderTrainer(object):
     and dense_retriever.py CLI tools.
     """
 
-    def __init__(self, cfg: DictConfig, use_relational_embedding: bool):
+    def __init__(self, cfg: DictConfig, use_relational_embedding: bool, column_file_loc: str = None, row_file_loc: str = None):
         self.shard_id = cfg.local_rank if cfg.local_rank != -1 else 0
         self.distributed_factor = cfg.distributed_world_size or 1
+
+        self.use_relational_embedding = use_relational_embedding
+        self.column_file_loc = column_file_loc
+        self.row_file_loc = row_file_loc
 
         logger.info("***** Initializing components for training *****")
         if use_relational_embedding == True:
@@ -101,7 +106,11 @@ class BiEncoderTrainer(object):
         self.best_validation_result = None
         self.best_cp_name = None
         self.cfg = cfg
-        self.ds_cfg = BiencoderDatasetsCfg(cfg)
+    
+        if use_relational_embedding == True:
+            self.ds_cfg = RelationalBiencoderDatasetsCfg(cfg, column_file_loc, row_file_loc)
+        else:
+            self.ds_cfg = BiencoderDatasetsCfg(cfg)
 
         if saved_state:
             if use_relational_embedding == True:
@@ -259,14 +268,25 @@ class BiEncoderTrainer(object):
             if isinstance(samples_batch, Tuple):
                 samples_batch, dataset = samples_batch
             logger.info("Eval step: %d ,rnk=%s", i, cfg.local_rank)
-            biencoder_input = BiEncoder.create_biencoder_input2(
-                samples_batch,
-                self.tensorizer,
-                True,
-                num_hard_negatives,
-                num_other_negatives,
-                shuffle=False,
-            )
+
+            if self.use_relational_embedding == True:
+                biencoder_input = BiEncoder.create_biencoder_input2(
+                    samples_batch,
+                    self.tensorizer,
+                    True,
+                    num_hard_negatives,
+                    num_other_negatives,
+                    shuffle=False,
+                )
+            else:
+                biencoder_input = RelationalBiEncoder.create_biencoder_input2(
+                    samples_batch,
+                    self.tensorizer,
+                    True,
+                    num_hard_negatives,
+                    num_other_negatives,
+                    shuffle=False,
+                )
 
             # get the token to be used for representation selection
             ds_cfg = self.ds_cfg.dev_datasets[dataset]
@@ -345,14 +365,26 @@ class BiEncoderTrainer(object):
             if isinstance(samples_batch, Tuple):
                 samples_batch, dataset = samples_batch
 
-            biencoder_input = BiEncoder.create_biencoder_input2(
-                samples_batch,
-                self.tensorizer,
-                True,
-                num_hard_negatives,
-                num_other_negatives,
-                shuffle=False,
-            )
+
+            if self.use_relational_embedding == True:
+                biencoder_input = BiEncoder.create_biencoder_input2(
+                    samples_batch,
+                    self.tensorizer,
+                    True,
+                    num_hard_negatives,
+                    num_other_negatives,
+                    shuffle=False,
+                )
+            else:
+                biencoder_input = RelationalBiEncoder.create_biencoder_input2(
+                    samples_batch,
+                    self.tensorizer,
+                    True,
+                    num_hard_negatives,
+                    num_other_negatives,
+                    shuffle=False,
+                )
+
             total_ctxs = len(ctx_represenations)
             ctxs_ids = biencoder_input.context_ids
             ctxs_segments = biencoder_input.ctx_segments
@@ -477,16 +509,29 @@ class BiEncoderTrainer(object):
             data_iteration = train_data_iterator.get_iteration()
             random.seed(seed + epoch + data_iteration)
 
-            biencoder_batch = BiEncoder.create_biencoder_input2(
-                samples_batch,
-                self.tensorizer,
-                True,
-                num_hard_negatives,
-                num_other_negatives,
-                shuffle=True,
-                shuffle_positives=shuffle_positives,
-                query_token=special_token,
-            )
+            if self.use_relational_embedding == True:
+                biencoder_batch = BiEncoder.create_biencoder_input2(
+                    samples_batch,
+                    self.tensorizer,
+                    True,
+                    num_hard_negatives,
+                    num_other_negatives,
+                    shuffle=True,
+                    shuffle_positives=shuffle_positives,
+                    query_token=special_token,
+                )
+            else:
+                biencoder_batch = RelationalBiEncoder.create_biencoder_input2(
+                    samples_batch,
+                    self.tensorizer,
+                    True,
+                    num_hard_negatives,
+                    num_other_negatives,
+                    shuffle=True,
+                    shuffle_positives=shuffle_positives,
+                    query_token=special_token,
+                )
+
 
             # get the token to be used for representation selection
             from dpr.data.biencoder_data import DEFAULT_SELECTOR
@@ -764,7 +809,9 @@ def main(cfg: DictConfig):
             )
         )
     use_relational_embedding = cfg.train.use_relational_embedding
-
+    if use_relational_embedding == True:
+        assert cfg.column_file_loc != None and cfg.row_file_loc != None, "Requires column/row embedding files!"
+    
     if cfg.output_dir is not None:
         os.makedirs(cfg.output_dir, exist_ok=True)
 
@@ -778,7 +825,8 @@ def main(cfg: DictConfig):
     # Initialize wandb run
     if cfg.local_rank == 0:
         run = wandb.init(project="MultiQA", entity="deokhk", name=cfg.experiment_name)
-    trainer = BiEncoderTrainer(cfg, use_relational_embedding)
+    
+    trainer = BiEncoderTrainer(cfg, use_relational_embedding, cfg.column_file_loc, cfg.row_file_loc)
 
     if cfg.train_datasets and len(cfg.train_datasets) > 0:
         trainer.run_train(run)

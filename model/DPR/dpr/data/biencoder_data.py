@@ -4,6 +4,7 @@ import glob
 import logging
 import os
 import random
+import pickle
 from typing import Dict, List, Tuple
 
 import hydra
@@ -18,7 +19,7 @@ from dpr.utils.data_utils import read_data_from_json_files, Tensorizer
 
 logger = logging.getLogger(__name__)
 BiEncoderPassage = collections.namedtuple("BiEncoderPassage", ["text", "title"])
-
+RelationalBiEncoderPassage = collections.namedtuple("RelationalBiencoderPassage", ["text", "title", "column_ids", "row_ids"])
 
 class BiEncoderSample(object):
     query: str
@@ -26,6 +27,11 @@ class BiEncoderSample(object):
     negative_passages: List[BiEncoderPassage]
     hard_negative_passages: List[BiEncoderPassage]
 
+class RelationalBiEncoderSample(object):
+    query: str
+    positive_passages: List[RelationalBiEncoderPassage]
+    negative_passages: List[RelationalBiEncoderPassage]
+    hard_negative_passages: List[RelationalBiEncoderPassage]
 
 class RepTokenSelector(object):
     def get_positions(self, input_ids: T, tenzorizer: Tensorizer):
@@ -183,7 +189,7 @@ class JsonQADataset(Dataset):
             [s["question"] for s in self.data[start_idx:end_idx]],
             [s["answers"] for s in self.data[start_idx:end_idx]],
         )
-
+        
 
 def normalize_passage(ctx_text: str):
     ctx_text = ctx_text.replace("\n", " ").replace("’", "'")
@@ -194,6 +200,75 @@ def normalize_question(question: str) -> str:
     question = question.replace("’", "'")
     return question
 
+class RelationalJsonQADataset(JsonQADataset):
+    def __init__(
+        self,
+        file: str,
+        column_file_loc: str,
+        row_file_loc: str,
+        selector: DictConfig = None,
+        special_token: str = None,
+        encoder_type: str = None,
+        shuffle_positives: bool = False,
+        normalize: bool = False,
+        query_special_suffix: str = None,
+    ):
+        super().__init__(
+            file=file,
+            selector=selector,
+            special_token=special_token,
+            encoder_type=encoder_type,
+            shuffle_positives=shuffle_positives,
+            normalize=normalize,
+            query_special_suffix=query_special_suffix
+        )
+
+        with open(column_file_loc,"rb") as fr:
+            column_embedding_list = pickle.load(fr)
+
+        with open(row_file_loc,"rb") as fr:
+            row_embedding_list = pickle.load(fr)
+
+        self.column_embedding_list = column_embedding_list
+        self.row_embedding_list = row_embedding_list
+
+        logger.info("Loaded column, row embedding files")
+
+    def __getitem__(self, index) -> RelationalBiEncoderSample:
+        json_sample = self.data[index]
+        r = RelationalBiEncoderSample()
+        r.query = self._process_query(json_sample["question"])
+
+        positive_ctxs = json_sample["positive_ctxs"]
+        negative_ctxs = json_sample["negative_ctxs"] if "negative_ctxs" in json_sample else []
+        hard_negative_ctxs = json_sample["hard_negative_ctxs"] if "hard_negative_ctxs" in json_sample else []
+
+        for ctx in positive_ctxs + negative_ctxs + hard_negative_ctxs:
+            if "title" not in ctx:
+                ctx["title"] = None
+
+        def create_passage(ctx: dict):
+            if int(ctx["passage_id"]) >= 21015325:
+                # table passage. padding will be done later, according to text_to_tensor
+                return RelationalBiEncoderPassage(
+                    normalize_passage(ctx["text"]) if self.normalize else ctx["text"],
+                    ctx["title"],
+                    self.column_embedding_list[int(ctx["passage_id"]) - 21015325],
+                    self.row_embedding_list[int(ctx["passage_id"]) - 21015325],
+                )
+            else:
+                # plain passage. padding will be done later, according to text_to_tensor
+                return RelationalBiEncoderPassage(
+                    normalize_passage(ctx["text"]) if self.normalize else ctx["text"],
+                    ctx["title"],
+                    None,
+                    None,
+                )
+
+        r.positive_passages = [create_passage(ctx) for ctx in positive_ctxs]
+        r.negative_passages = [create_passage(ctx) for ctx in negative_ctxs]
+        r.hard_negative_passages = [create_passage(ctx) for ctx in hard_negative_ctxs]
+        return r
 
 class Cell:
     def __init__(self):
