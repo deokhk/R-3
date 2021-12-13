@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#SBATCH -J gen_reader_dataset_for_scratch # job name
+#SBATCH -J Rel_DPR_scratch # job name
 #SBATCH -o sbatch_output_log/output_%x_%j.out # standard output and error log
 #SBATCH -p A100 # queue name or partiton name
 #SBATCH -t 72:00:00 # Run time (hh:mm:ss)
-#SBATCH  --gres=gpu:1
+#SBATCH  --gres=gpu:4
 #SBATCH  --nodes=1
 #SBATCH  --ntasks=4
 #SBATCH  --cpus-per-task=4
@@ -18,6 +18,6 @@ module purge
 
 date
 
-sh gen_embedding_and_train_data_scratch.sh
+sh train_rel_dpr_scratch.sh
 
 date

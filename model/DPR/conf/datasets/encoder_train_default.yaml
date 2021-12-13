@@ -8,11 +8,15 @@ nq_train_with_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
   file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train-text-table.json"
 
-nq_train_with_table_new_linearization:
-  _target_: dpr.data.biencoder_data.JsonQADataset
+nq_train_with_table_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
   file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train-text-table-without-special.json"
   column_file_loc: "/home/deokhk/research/MultiQA/model/DPR/column_ids_list_without_special_token.pickle"
   row_file_loc: "/home/deokhk/research/MultiQA/model/DPR/row_ids_list_without_special_token.pickle"
+
+nq_train_with_table_new_linearization:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train-text-table-without-special.json"
 
 nq_train_hn1:
   _target_: dpr.data.biencoder_data.JsonQADataset
@@ -26,11 +30,15 @@ nq_dev_with_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
   file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev-text-table.json"
 
-nq_dev_with_table_new_linearization:
-  _target_: dpr.data.biencoder_data.JsonQADataset
+nq_dev_with_table_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
   file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev-text-table-without-special.json"
   column_file_loc: "/home/deokhk/research/MultiQA/model/DPR/column_ids_list_without_special_token.pickle"
   row_file_loc: "/home/deokhk/research/MultiQA/model/DPR/row_ids_list_without_special_token.pickle"
+
+nq_dev_with_table_new_linearization:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev-text-table-without-special.json"
 
 trivia_train:
   _target_: dpr.data.biencoder_data.JsonQADataset
