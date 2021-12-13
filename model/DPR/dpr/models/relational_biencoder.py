@@ -35,7 +35,7 @@ RelationalBiEncoderBatch = collections.namedtuple(
         "context_ids",
         "ctx_segments",
         "ctx_column_ids",
-        "ctx_row_ids"
+        "ctx_row_ids",
         "is_positive",
         "hard_negatives",
         "encoder_type",
@@ -202,6 +202,8 @@ class RelationalBiEncoder(nn.Module):
         """
         question_tensors = []
         ctx_tensors = []
+        column_id_tensors = []
+        row_id_tensors = []
         positive_ctx_indices = []
         hard_neg_ctx_indices = []
 
@@ -262,6 +264,34 @@ class RelationalBiEncoder(nn.Module):
                     question_tensors.append(tensorizer.text_to_tensor(" ".join([query_token, question])))
             else:
                 question_tensors.append(tensorizer.text_to_tensor(question))
+        
+            ctx_column_ids = []
+            ctx_row_ids = []
+            max_length = len(ctx_tensors[0])
+
+            for ctx in all_ctxs:
+                if ctx.column_ids is None:
+                    ctx_column_ids.append(torch.zeros(max_length, dtype=torch.int64))
+                else:
+                    if len(ctx.column_ids) >= max_length:
+                        truncated_column_id = ctx.column_ids[0:max_length-1] + [0] # We append "[SEP]" token to input ids when the ids exceeds maximum length.
+                        ctx_column_ids.append(torch.tensor(truncated_column_id, dtype=torch.int64))
+                    else:
+                        ctx_column_ids.append(torch.tensor(ctx.column_ids + [0 for _ in range(max_length - len(ctx.column_ids))], dtype=torch.int64))
+            
+            for ctx in all_ctxs:
+                if ctx.row_ids is None:
+                    ctx_row_ids.append(torch.zeros(max_length, dtype=torch.int64))
+                else:
+                    if len(ctx.row_ids) >= max_length:
+                        truncated_row_id = ctx.row_ids[0:max_length-1] + [0] # We append "[SEP]" token to input ids when the ids exceeds maximum length.
+                        ctx_row_ids.append(torch.tensor(truncated_row_id, dtype=torch.int64))
+                    else:
+                        ctx_row_ids.append(torch.tensor(ctx.row_ids + [0 for _ in range(max_length - len(ctx.row_ids))], dtype=torch.int64))
+            
+            
+            column_id_tensors.extend(ctx_column_ids)
+            row_id_tensors.extend(ctx_row_ids)
 
         ctxs_tensor = torch.cat([ctx.view(1, -1) for ctx in ctx_tensors], dim=0)
         questions_tensor = torch.cat([q.view(1, -1) for q in question_tensors], dim=0)
@@ -269,11 +299,16 @@ class RelationalBiEncoder(nn.Module):
         ctx_segments = torch.zeros_like(ctxs_tensor)
         question_segments = torch.zeros_like(questions_tensor)
 
+        column_id_tensors = torch.cat([c.view(1,-1) for c in column_id_tensors], dim = 0)
+        row_id_tensors = torch.cat([r.view(1,-1) for r in row_id_tensors], dim = 0)
+        
         return RelationalBiEncoderBatch(
             questions_tensor,
             question_segments,
             ctxs_tensor,
             ctx_segments,
+            column_id_tensors,
+            row_id_tensors,
             positive_ctx_indices,
             hard_neg_ctx_indices,
             "question",

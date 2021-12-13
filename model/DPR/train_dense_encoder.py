@@ -270,7 +270,7 @@ class BiEncoderTrainer(object):
             logger.info("Eval step: %d ,rnk=%s", i, cfg.local_rank)
 
             if self.use_relational_embedding == True:
-                biencoder_input = BiEncoder.create_biencoder_input2(
+                biencoder_input = RelationalBiEncoder.create_biencoder_input2(
                     samples_batch,
                     self.tensorizer,
                     True,
@@ -279,7 +279,7 @@ class BiEncoderTrainer(object):
                     shuffle=False,
                 )
             else:
-                biencoder_input = RelationalBiEncoder.create_biencoder_input2(
+                biencoder_input = BiEncoder.create_biencoder_input2(
                     samples_batch,
                     self.tensorizer,
                     True,
@@ -292,15 +292,26 @@ class BiEncoderTrainer(object):
             ds_cfg = self.ds_cfg.dev_datasets[dataset]
             rep_positions = ds_cfg.selector.get_positions(biencoder_input.question_ids, self.tensorizer)
             encoder_type = ds_cfg.encoder_type
+            if self.use_relational_embedding == True:
+                loss, correct_cnt = _do_relational_biencoder_fwd_pass(
+                    self.biencoder,
+                    biencoder_input,
+                    self.tensorizer,
+                    cfg,
+                    encoder_type=encoder_type,
+                    rep_positions=rep_positions,
+                )
 
-            loss, correct_cnt = _do_biencoder_fwd_pass(
-                self.biencoder,
-                biencoder_input,
-                self.tensorizer,
-                cfg,
-                encoder_type=encoder_type,
-                rep_positions=rep_positions,
-            )
+            else:
+                loss, correct_cnt = _do_biencoder_fwd_pass(
+                    self.biencoder,
+                    biencoder_input,
+                    self.tensorizer,
+                    cfg,
+                    encoder_type=encoder_type,
+                    rep_positions=rep_positions,
+                )
+
             total_loss += loss.item()
             total_correct_predictions += correct_cnt
             batches += 1
@@ -367,15 +378,6 @@ class BiEncoderTrainer(object):
 
 
             if self.use_relational_embedding == True:
-                biencoder_input = BiEncoder.create_biencoder_input2(
-                    samples_batch,
-                    self.tensorizer,
-                    True,
-                    num_hard_negatives,
-                    num_other_negatives,
-                    shuffle=False,
-                )
-            else:
                 biencoder_input = RelationalBiEncoder.create_biencoder_input2(
                     samples_batch,
                     self.tensorizer,
@@ -384,10 +386,20 @@ class BiEncoderTrainer(object):
                     num_other_negatives,
                     shuffle=False,
                 )
-
+            else:
+                biencoder_input = BiEncoder.create_biencoder_input2(
+                    samples_batch,
+                    self.tensorizer,
+                    True,
+                    num_hard_negatives,
+                    num_other_negatives,
+                    shuffle=False,
+                )
             total_ctxs = len(ctx_represenations)
             ctxs_ids = biencoder_input.context_ids
             ctxs_segments = biencoder_input.ctx_segments
+            ctxs_column_ids = biencoder_input.ctx_column_ids
+            ctxs_row_ids = biencoder_input.ctx_row_ids
             bsz = ctxs_ids.size(0)
 
             # get the token to be used for representation selection
@@ -401,28 +413,44 @@ class BiEncoderTrainer(object):
                 q_ids, q_segments = (
                     (biencoder_input.question_ids, biencoder_input.question_segments) if j == 0 else (None, None)
                 )
-
-                if j == 0 and cfg.n_gpu > 1 and q_ids.size(0) == 1:
-                    # if we are in DP (but not in DDP) mode, all model input tensors should have batch size >1 or 0,
-                    # otherwise the other input tensors will be split but only the first split will be called
+ 
+                if j == 0 and cfg.n_gpu > 1 and q_ids.size(0) == 1: 
+                    # if we are in DP (but not in DDP) mode, all model inp ut tensors should have batch size >1 or 0,
+                    # otherwise the other input tensors will be split but  only the first split will be called
                     continue
 
                 ctx_ids_batch = ctxs_ids[batch_start : batch_start + sub_batch_size]
                 ctx_seg_batch = ctxs_segments[batch_start : batch_start + sub_batch_size]
+                ctx_column_batch = ctxs_column_ids[batch_start : batch_start + sub_batch_size]
+                ctx_row_batch = ctxs_row_ids[batch_start : batch_start + sub_batch_size]
 
                 q_attn_mask = self.tensorizer.get_attn_mask(q_ids)
                 ctx_attn_mask = self.tensorizer.get_attn_mask(ctx_ids_batch)
                 with torch.no_grad():
-                    q_dense, ctx_dense = self.biencoder(
-                        q_ids,
-                        q_segments,
-                        q_attn_mask,
-                        ctx_ids_batch,
-                        ctx_seg_batch,
-                        ctx_attn_mask,
-                        encoder_type=encoder_type,
-                        representation_token_pos=rep_positions,
-                    )
+                    if self.use_relational_embedding == True:
+                        q_dense, ctx_dense = self.biencoder(
+                            q_ids,
+                            q_segments,
+                            q_attn_mask,
+                            ctx_ids_batch,
+                            ctx_seg_batch,
+                            ctx_attn_mask,
+                            ctx_column_batch,
+                            ctx_row_batch,
+                            encoder_type=encoder_type,
+                            representation_token_pos=rep_positions,
+                        )
+                    else:
+                        q_dense, ctx_dense = self.biencoder(
+                            q_ids,
+                            q_segments,
+                            q_attn_mask,
+                            ctx_ids_batch,
+                            ctx_seg_batch,
+                            ctx_attn_mask,
+                            encoder_type=encoder_type,
+                            representation_token_pos=rep_positions,
+                        )
 
                 if q_dense is not None:
                     q_represenations.extend(q_dense.cpu().split(1, dim=0))
@@ -510,7 +538,7 @@ class BiEncoderTrainer(object):
             random.seed(seed + epoch + data_iteration)
 
             if self.use_relational_embedding == True:
-                biencoder_batch = BiEncoder.create_biencoder_input2(
+                biencoder_batch = RelationalBiEncoder.create_biencoder_input2(
                     samples_batch,
                     self.tensorizer,
                     True,
@@ -521,7 +549,7 @@ class BiEncoderTrainer(object):
                     query_token=special_token,
                 )
             else:
-                biencoder_batch = RelationalBiEncoder.create_biencoder_input2(
+                biencoder_batch = BiEncoder.create_biencoder_input2(
                     samples_batch,
                     self.tensorizer,
                     True,
@@ -541,15 +569,26 @@ class BiEncoderTrainer(object):
             rep_positions = selector.get_positions(biencoder_batch.question_ids, self.tensorizer)
 
             loss_scale = cfg.loss_scale_factors[dataset] if cfg.loss_scale_factors else None
-            loss, correct_cnt = _do_biencoder_fwd_pass(
-                self.biencoder,
-                biencoder_batch,
-                self.tensorizer,
-                cfg,
-                encoder_type=encoder_type,
-                rep_positions=rep_positions,
-                loss_scale=loss_scale,
-            )
+            if self.use_relational_embedding == True:
+                loss, correct_cnt = _do_relational_biencoder_fwd_pass(
+                    self.biencoder,
+                    biencoder_batch,
+                    self.tensorizer,
+                    cfg,
+                    encoder_type=encoder_type,
+                    rep_positions=rep_positions,
+                    loss_scale=loss_scale,
+                )
+            else:
+                loss, correct_cnt = _do_biencoder_fwd_pass(
+                    self.biencoder,
+                    biencoder_batch,
+                    self.tensorizer,
+                    cfg,
+                    encoder_type=encoder_type,
+                    rep_positions=rep_positions,
+                    loss_scale=loss_scale,
+                )
 
             epoch_correct_predictions += correct_cnt
             epoch_loss += loss.item()
@@ -743,7 +782,7 @@ def _do_biencoder_fwd_pass(
     rep_positions=0,
     loss_scale: float = None,
 ) -> Tuple[torch.Tensor, int]:
-
+    
     input = BiEncoderBatch(**move_to_device(input._asdict(), cfg.device))
 
     q_attn_mask = tensorizer.get_attn_mask(input.question_ids)
@@ -769,6 +808,71 @@ def _do_biencoder_fwd_pass(
                 input.context_ids,
                 input.ctx_segments,
                 ctx_attn_mask,
+                encoder_type=encoder_type,
+                representation_token_pos=rep_positions,
+            )
+
+    local_q_vector, local_ctx_vectors = model_out
+
+    loss_function = BiEncoderNllLoss()
+
+    loss, is_correct = _calc_loss(
+        cfg,
+        loss_function,
+        local_q_vector,
+        local_ctx_vectors,
+        input.is_positive,
+        input.hard_negatives,
+        loss_scale=loss_scale,
+    )
+
+    is_correct = is_correct.sum().item()
+
+    if cfg.n_gpu > 1:
+        loss = loss.mean()
+    if cfg.train.gradient_accumulation_steps > 1:
+        loss = loss / cfg.train.gradient_accumulation_steps
+    return loss, is_correct
+
+def _do_relational_biencoder_fwd_pass(
+    model: nn.Module,
+    input: RelationalBiEncoderBatch,
+    tensorizer: Tensorizer,
+    cfg,
+    encoder_type: str,
+    rep_positions=0,
+    loss_scale: float = None,
+) -> Tuple[torch.Tensor, int]:
+    
+    input = RelationalBiEncoderBatch(**move_to_device(input._asdict(), cfg.device))
+
+    q_attn_mask = tensorizer.get_attn_mask(input.question_ids)
+    ctx_attn_mask = tensorizer.get_attn_mask(input.context_ids)
+
+    if model.training:
+        model_out = model(
+            input.question_ids,
+            input.question_segments,
+            q_attn_mask,
+            input.context_ids,
+            input.ctx_segments,
+            ctx_attn_mask,
+            input.ctx_column_ids,
+            input.ctx_row_ids,
+            encoder_type=encoder_type,
+            representation_token_pos=rep_positions,
+        )
+    else:
+        with torch.no_grad():
+            model_out = model(
+                input.question_ids,
+                input.question_segments,
+                q_attn_mask,
+                input.context_ids,
+                input.ctx_segments,
+                ctx_attn_mask,
+                input.ctx_column_ids,
+                input.ctx_row_ids,
                 encoder_type=encoder_type,
                 representation_token_pos=rep_positions,
             )
