@@ -254,10 +254,6 @@ class RelationalBertEmbeddings(nn.Module):
         token_type_embeddings = self.token_type_embeddings(token_type_ids)
         column_embeddings = self.column_embeddings(column_ids)
         row_embeddings = self.row_embeddings(row_ids)
-        print("===COLUMN ID===")
-        print(column_ids)
-        print("===ROW ID===")
-        print(row_ids)
         embeddings = inputs_embeds + position_embeddings + token_type_embeddings + column_embeddings + row_embeddings
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)

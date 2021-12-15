@@ -177,7 +177,6 @@ def gen_table_passages(table, tokenizer):
     value_column_ids = []
     value_row_ids = []
     linearized_value = ""
-    segment_ids_for_schema = [0 for i in range(len(preceding_title))] + [1 for i in range(len(schema))]
     row_ids_for_schema = [0 for i in range(len(preceding_title+schema))]
     column_ids_for_schema = [0 for i in range(len(preceding_title))]
     schema_column_id = 1
@@ -187,8 +186,11 @@ def gen_table_passages(table, tokenizer):
             schema_column_id+=1
             column_ids_for_schema.append(0)
         elif tok == "[SEP]":
-            column_ids_for_schema.append(0)
-            break
+            if tok == schema[-1]:
+                column_ids_for_schema.append(0)
+                break
+            else:
+                raise ValueError("Schema string contains [SEP] in the position that is not the end.")
         else:
             column_ids_for_schema.append(schema_column_id)
     
@@ -232,25 +234,37 @@ def gen_table_passages(table, tokenizer):
     psg_list = []
     column_ids_list = []
     row_ids_list = []
-    segment_ids_list = []
-    
-    # In case of segment_id, we add [1] at the end for [SEP] token at the end of the input feeded to the model.
+
+    assert len(linearized_value) == len(value_column_ids) == len(value_row_ids), "Linearized value and value column/row must be the same length"
+    """
+    Check whether the generate row/column ids satisfy those conditions
+    1. Number of row <= 100
+    2. Number of column (header element) <= 50
+    """
+    assert max(value_row_ids) <= 100, "Violate 1. Number of row <= 100"
+    assert max(value_column_ids) <= 50, "Violate 2. Number of column <= 50"
+
     if quotient == 0:
         psg_list.append(linearized_value[0:remainder])
         column_ids_list.append(column_ids_for_schema + value_column_ids[0:remainder])
         row_ids_list.append(row_ids_for_schema + value_row_ids[0:remainder])
-        segment_ids_list.append(segment_ids_for_schema + [1 for i in range(remainder)] +[1])
     else:
-        for i in range(quotient+1):
-            psg_list.append(linearized_value[i*100:(i+1)*100])
-            column_ids_list.append(column_ids_for_schema + value_column_ids[i*100:(i+1)*100])
-            row_ids_list.append(row_ids_for_schema + value_row_ids[i*100:(i+1)*100])
-            segment_ids_list.append(segment_ids_for_schema + [1 for i in range(100)] +[1])
-            if i == quotient and remainder:
-                psg_list.append(linearized_value[(i+1)*100:(i+1)*100 + remainder])
-                column_ids_list.append(column_ids_for_schema + value_column_ids[(i+1)*100:(i+1)*100 + remainder])
-                row_ids_list.append(row_ids_for_schema + value_row_ids[(i+1)*100:(i+1)*100 + remainder])
-                segment_ids_list.append(segment_ids_for_schema + [1 for i in range(remainder)] +[1])
+        if remainder == 0:
+            for i in range(quotient):
+                psg_list.append(linearized_value[i*100:(i+1)*100])
+                column_ids_list.append(column_ids_for_schema + value_column_ids[i*100:(i+1)*100])
+                row_ids_list.append(row_ids_for_schema + value_row_ids[i*100:(i+1)*100])
+        else:
+            for i in range(quotient):
+                psg_list.append(linearized_value[i*100:(i+1)*100])
+                column_ids_list.append(column_ids_for_schema + value_column_ids[i*100:(i+1)*100])
+                row_ids_list.append(row_ids_for_schema + value_row_ids[i*100:(i+1)*100])
+                if i == quotient-1:
+                    psg_list.append(linearized_value[(i+1)*100:(i+1)*100+remainder])
+                    column_ids_list.append(column_ids_for_schema + value_column_ids[(i+1)*100:(i+1)*100+remainder])
+                    row_ids_list.append(row_ids_for_schema + value_row_ids[(i+1)*100:(i+1)*100+remainder])
+
+
     # Replace [C_SEP] to ","
     linearized_column = linearized_column.replace("[C_SEP]", ",")
     # Replace [V_SEP] to "," and [R_SEP] to "[SEP]"
@@ -258,7 +272,7 @@ def gen_table_passages(table, tokenizer):
     replacer = value_replacements.get
     for idx, psg in enumerate(psg_list):
         psg_list[idx] = [replacer(elem,elem) for elem in psg]
-    return (linearized_column, psg_list, column_ids_list, row_ids_list, segment_ids_list)
+    return (linearized_column, psg_list, column_ids_list, row_ids_list)
 
 def generate_retrieval_data_without_hn(interactions, tokenizer, type, table_passage_loc):
     """
@@ -278,7 +292,7 @@ def generate_retrieval_data_without_hn(interactions, tokenizer, type, table_pass
     """
     print("==== Now Generating table retrieval dataset without hard negatives. ====")
 
-    # Generate text to psg_id mapping for put passage id and origin into the passage in the generated train file.
+    # Generate text to psg_id mapping for put passage id into the passage in the generated train file.
     text_to_psg_id = {}
     with open(table_passage_loc, 'r') as file:
         # Table passage file doesn't have a header.
@@ -365,17 +379,15 @@ def main():
 
     total_column_ids_list = []
     total_row_ids_list = []
-    total_segment_ids_list = []
     for table in tqdm(tb_list):
         table = json.loads(table)
-        linearized_column, psg_list, column_ids_list, row_ids_list, segment_ids_list = gen_table_passages(table, tokenizer)
+        linearized_column, psg_list, column_ids_list, row_ids_list = gen_table_passages(filtered_tables, tokenizer)
         for psg in psg_list:
             psg = tokenizer.decode(tokenizer.convert_tokens_to_ids(psg))
             tsv_writer.writerow([psg_count, linearized_column + " [SEP] " + psg, table["documentTitle"]])
             psg_count+=1
         total_column_ids_list += column_ids_list
         total_row_ids_list += row_ids_list
-        total_segment_ids_list += segment_ids_list
         count+=1
 
     print(f"Total number of table linearized :{count}")
@@ -389,9 +401,6 @@ def main():
         pickle.dump(total_row_ids_list, fw)
     print(f"Saved row ids for passages")
 
-    with open("segment_ids_list_without_special_token.pickle", "wb") as fw:
-        pickle.dump(total_segment_ids_list, fw)
-    print(f"Saved segment ids for passages")
 
     f.close()
 
