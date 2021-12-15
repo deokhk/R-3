@@ -379,9 +379,8 @@ def main():
 
     total_column_ids_list = []
     total_row_ids_list = []
-    for table in tqdm(tb_list):
-        table = json.loads(table)
-        linearized_column, psg_list, column_ids_list, row_ids_list = gen_table_passages(filtered_tables, tokenizer)
+    for table in tqdm(filtered_tables):
+        linearized_column, psg_list, column_ids_list, row_ids_list = gen_table_passages(table, tokenizer)
         for psg in psg_list:
             psg = tokenizer.decode(tokenizer.convert_tokens_to_ids(psg))
             tsv_writer.writerow([psg_count, linearized_column + " [SEP] " + psg, table["documentTitle"]])
