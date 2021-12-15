@@ -144,6 +144,7 @@ cython_debug/
 *.csv
 *.out
 *.pickle
+*.ipynb
 /outputs/
 /model/DPR/outputs
 /model/DPR/sbatch_output_log
