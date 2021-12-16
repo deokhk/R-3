@@ -386,6 +386,12 @@ class BiEncoderTrainer(object):
                     num_other_negatives,
                     shuffle=False,
                 )
+                total_ctxs = len(ctx_represenations)
+                ctxs_ids = biencoder_input.context_ids
+                ctxs_segments = biencoder_input.ctx_segments
+                ctxs_column_ids = biencoder_input.ctx_column_ids
+                ctxs_row_ids = biencoder_input.ctx_row_ids
+                bsz = ctxs_ids.size(0)
             else:
                 biencoder_input = BiEncoder.create_biencoder_input2(
                     samples_batch,
@@ -395,12 +401,10 @@ class BiEncoderTrainer(object):
                     num_other_negatives,
                     shuffle=False,
                 )
-            total_ctxs = len(ctx_represenations)
-            ctxs_ids = biencoder_input.context_ids
-            ctxs_segments = biencoder_input.ctx_segments
-            ctxs_column_ids = biencoder_input.ctx_column_ids
-            ctxs_row_ids = biencoder_input.ctx_row_ids
-            bsz = ctxs_ids.size(0)
+                total_ctxs = len(ctx_represenations)
+                ctxs_ids = biencoder_input.context_ids
+                ctxs_segments = biencoder_input.ctx_segments
+                bsz = ctxs_ids.size(0)
 
             # get the token to be used for representation selection
             ds_cfg = self.ds_cfg.dev_datasets[dataset]
@@ -421,8 +425,9 @@ class BiEncoderTrainer(object):
 
                 ctx_ids_batch = ctxs_ids[batch_start : batch_start + sub_batch_size]
                 ctx_seg_batch = ctxs_segments[batch_start : batch_start + sub_batch_size]
-                ctx_column_batch = ctxs_column_ids[batch_start : batch_start + sub_batch_size]
-                ctx_row_batch = ctxs_row_ids[batch_start : batch_start + sub_batch_size]
+                if self.use_relational_embedding == True:
+                    ctx_column_batch = ctxs_column_ids[batch_start : batch_start + sub_batch_size]
+                    ctx_row_batch = ctxs_row_ids[batch_start : batch_start + sub_batch_size]
 
                 q_attn_mask = self.tensorizer.get_attn_mask(q_ids)
                 ctx_attn_mask = self.tensorizer.get_attn_mask(ctx_ids_batch)
