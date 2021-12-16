@@ -29,6 +29,7 @@ def interactions_visualize_and_merge(interaction_loc):
     """
     Print a single interaction json object.
     We print train, dev, test interactions
+    Return the merged interaction
     """
     train_it_loc = interaction_loc + "/train.jsonl"
     dev_it_loc = interaction_loc + "/dev.jsonl"
