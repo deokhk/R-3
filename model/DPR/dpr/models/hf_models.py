@@ -54,6 +54,7 @@ def get_relational_bert_biencoder_components(cfg, inference_only: bool = False, 
             learning_rate=cfg.train.learning_rate,
             adam_eps=cfg.train.adam_eps,
             weight_decay=cfg.train.weight_decay,
+            use_relational_embedding=True,
         )
         if not inference_only
         else None
@@ -89,6 +90,7 @@ def get_bert_biencoder_components(cfg, inference_only: bool = False, **kwargs):
             learning_rate=cfg.train.learning_rate,
             adam_eps=cfg.train.adam_eps,
             weight_decay=cfg.train.weight_decay,
+            use_relational_embedding=False,
         )
         if not inference_only
         else None
@@ -183,26 +185,39 @@ def get_optimizer(
     learning_rate: float = 1e-5,
     adam_eps: float = 1e-8,
     weight_decay: float = 0.0,
+    use_relational_embedding: bool = False,
 ) -> torch.optim.Optimizer:
     no_decay = ["bias", "LayerNorm.weight"]
-    # TODO: optimizer setting 바꾸기. 일단 한번 돌려보고 model에서 embedding layer의 param 어떻게 접근할것인지 확인
-    optimizer_grouped_parameters = [
-        {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and n in ["ctx_model.embeddings.column_embeddings.weight", "ctx_model.embeddings.row_embeddings.weight"]],
-            "weight_decay": weight_decay,
-            "learning_rate": learning_rate*5
-        },
-        {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and n not in ["ctx_model.embeddings.column_embeddings.weight", "ctx_model.embeddings.row_embeddings.weight"]],
-            "weight_decay": weight_decay,
-        },
-        {
-            "params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)],
-            "weight_decay": 0.0,
-        },
-    ]
+    if use_relational_embedding == True:
+        optimizer_grouped_parameters = [
+            {
+                "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and n in ["ctx_model.embeddings.column_embeddings.weight", "ctx_model.embeddings.row_embeddings.weight"]],
+                "weight_decay": weight_decay,
+                "learning_rate": learning_rate*5
+            },
+            {
+                "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and n not in ["ctx_model.embeddings.column_embeddings.weight", "ctx_model.embeddings.row_embeddings.weight"]],
+                "weight_decay": weight_decay,
+            },
+            {
+                "params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)],
+                "weight_decay": 0.0,
+            },
+        ]
+    else:
+        optimizer_grouped_parameters = [
+            {
+                "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+                "weight_decay": weight_decay,
+            },
+            {
+                "params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)],
+                "weight_decay": 0.0,
+            },
+        ]
     optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=learning_rate, eps=adam_eps)
     return optimizer
+    
 
 
 def get_bert_tokenizer(pretrained_cfg_name: str, do_lower_case: bool = True):

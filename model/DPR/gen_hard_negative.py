@@ -34,7 +34,7 @@ def main(args):
 
     es = Elasticsearch(timeout=30, max_retries=10, retry_on_timeout=True)
     passage_loc = args.passage_loc
-    bulk(es, gen_passages(passage_loc)) # Index table passages. Wait a while till all passages are indexed..
+    # bulk(es, gen_passages(passage_loc)) # Index table passages. Wait a while till all passages are indexed..
 
     with open(args.train_table_without_hn, "r") as f:
         train_table_without_hn = json.load(f)

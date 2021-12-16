@@ -315,7 +315,7 @@ def generate_retrieval_data_without_hn(interactions, tokenizer, type, table_pass
         data["answers"] = answers
         
         positive_context = {}
-        linearized_column, psg_list, _, _, _  = gen_table_passages(table, tokenizer)
+        linearized_column, psg_list, _, _  = gen_table_passages(table, tokenizer)
         gold_psg = ""
         max_answer_num = 0
         for psg in psg_list:
@@ -338,10 +338,10 @@ def generate_retrieval_data_without_hn(interactions, tokenizer, type, table_pass
             tb_retrieval_data.append(data)
 
     if type == "train":
-        with open("table_train_without_special_token.json", "w") as f:
+        with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_train_without_special_token.json", "w") as f:
             json.dump(tb_retrieval_data, f)
     elif type == "dev":
-        with open("table_dev_without_special_token.json", "w") as f:
+        with open("/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_dev_without_special_token.json", "w") as f:
             json.dump(tb_retrieval_data, f)
     print("Saving of retrieval data done.")
     print(f"Number of q/a pairs in {type} : {len(tb_retrieval_data)}")
@@ -351,7 +351,7 @@ def main():
     interaction_loc = "/home/deokhk/research/MultiQA/dataset/NQ_tables/interactions"
     with open(table_loc, 'r') as tb_file:
         tb_list = list(tb_file)
-    # filter_table(tb_list)
+    filter_table(tb_list)
     filtered_table_loc = "/home/deokhk/research/MultiQA/script/filtered_table.json"
     with open(filtered_table_loc, 'r') as data:
         filtered_tables = json.load(data)

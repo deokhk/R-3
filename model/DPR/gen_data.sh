@@ -7,7 +7,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=16
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=400G
+#SBATCH --mem=200G
 
 srun -l /bin/hostname
 srun -l /bin/pwd
@@ -17,5 +17,5 @@ module purge
 
 date
 
-python generate_table_passages_renew.py
+python gen_hard_negative.py
 date

@@ -14,7 +14,7 @@ learning_rate: 2e-5
 warmup_steps: 1237
 
 # Number of updates steps to accumulate before performing a backward/update pass.
-gradient_accumulation_steps: 2
+gradient_accumulation_steps: 8
 
 # Total number of training epochs to perform.
 num_train_epochs: 40
@@ -25,4 +25,4 @@ val_av_rank_hard_neg: 30
 val_av_rank_other_neg: 30
 val_av_rank_bsz: 128
 val_av_rank_max_qs: 10000
-use_relational_embedding: False
+use_relational_embedding: True
