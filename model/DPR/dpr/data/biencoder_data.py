@@ -248,6 +248,7 @@ class RelationalJsonQADataset(JsonQADataset):
                 ctx["title"] = None
 
         def create_passage(ctx: dict):
+            
             if int(ctx["passage_id"]) >= 21015325:
                 # table passage. padding will be done later, according to text_to_tensor
                 return RelationalBiEncoderPassage(
