@@ -81,7 +81,7 @@ def gen_ctx_vectors(
             logger.info("Encoded passages %d", total)
     return results
 
-@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
+@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
 @hydra.main(config_path="conf", config_name="gen_embs")
 def main(cfg: DictConfig):
 
@@ -96,7 +96,7 @@ def main(cfg: DictConfig):
     logger.info("CFG:")
     logger.info("%s", OmegaConf.to_yaml(cfg))
 
-    tensorizer, encoder, _ = init_biencoder_components(cfg.encoder.encoder_model_type, cfg.use_relational_embedding, cfg, inference_only=True)
+    tensorizer, encoder, _ = init_biencoder_components(cfg.encoder.encoder_model_type,  cfg, inference_only=True)
 
     encoder = encoder.ctx_model if cfg.encoder_type == "ctx" else encoder.question_model
 

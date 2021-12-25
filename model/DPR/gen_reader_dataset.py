@@ -38,7 +38,7 @@ def prepare_datas(context_file, category, saved_path):
     with open(file, 'w') as f:
         ujson.dump(qa_pairs, f)
 
-@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
+@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
 def main(args):
     paths = [args.train_context_path, args.dev_context_path, args.test_context_path]
     categories = ["train", "dev", "test"]

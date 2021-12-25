@@ -264,7 +264,7 @@ def validate_tables(
 
     return match_stats.top_k_chunk_hits
 
-@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
+@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
 @hydra.main(config_path="conf", config_name="dense_retriever")
 def main(cfg: DictConfig):
     cfg = setup_cfg_gpu(cfg)
@@ -274,7 +274,7 @@ def main(cfg: DictConfig):
     saved_state = load_states_from_checkpoint(cfg.model_file)
     set_cfg_params_from_state(saved_state.encoder_params, cfg)
 
-    tensorizer, encoder, _ = init_biencoder_components(cfg.encoder.encoder_model_type, cfg.use_relational_embedding, cfg, inference_only=True)
+    tensorizer, encoder, _ = init_biencoder_components(cfg.encoder.encoder_model_type, cfg, inference_only=True)
 
     encoder_path = cfg.encoder_path
     if encoder_path:

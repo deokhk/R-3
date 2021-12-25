@@ -96,11 +96,8 @@ def init_comp(initializers_dict, type, args, **kwargs):
         raise RuntimeError("unsupported model type: {}".format(type))
 
 
-def init_biencoder_components(encoder_type: str, use_relational_embedding: bool, args, **kwargs):
-    if use_relational_embedding == True:
-        return init_comp(RELATIONAL_BIENCODER_INITIALIZERS, encoder_type, args, **kwargs)
-    else:
-        return init_comp(BIENCODER_INITIALIZERS, encoder_type, args, **kwargs)
+def init_biencoder_components(encoder_type: str, args, **kwargs):
+    return init_comp(RELATIONAL_BIENCODER_INITIALIZERS, encoder_type, args, **kwargs)
 
 
 def init_reader_components(encoder_type: str, args, **kwargs):
