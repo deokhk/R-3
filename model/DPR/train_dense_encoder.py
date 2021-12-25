@@ -65,12 +65,9 @@ class BiEncoderTrainer(object):
     and dense_retriever.py CLI tools.
     """
 
-    def __init__(self, cfg: DictConfig,  column_file_loc: str = None, row_file_loc: str = None):
+    def __init__(self, cfg: DictConfig):
         self.shard_id = cfg.local_rank if cfg.local_rank != -1 else 0
         self.distributed_factor = cfg.distributed_world_size or 1
-
-        self.column_file_loc = column_file_loc
-        self.row_file_loc = row_file_loc
 
         logger.info("***** Initializing components for training *****")
         logger.info("***** Training Relational-aware DPR *****")
@@ -103,7 +100,7 @@ class BiEncoderTrainer(object):
         self.best_cp_name = None
         self.cfg = cfg
     
-        self.ds_cfg = RelationalBiencoderDatasetsCfg(cfg, column_file_loc, row_file_loc)
+        self.ds_cfg = RelationalBiencoderDatasetsCfg(cfg)
 
         if saved_state:
             augmented_state = saved_state
@@ -834,8 +831,6 @@ def main(cfg: DictConfig):
                 cfg.train.gradient_accumulation_steps
             )
         )
-    assert cfg.column_file_loc != None or cfg.row_file_loc != None, "Requires column/row embedding files!"
-    
     if cfg.output_dir is not None:
         os.makedirs(cfg.output_dir, exist_ok=True)
 
@@ -850,7 +845,7 @@ def main(cfg: DictConfig):
     if cfg.local_rank == 0:
         run = wandb.init(project="MultiQA", entity="deokhk", name=cfg.experiment_name)
     
-    trainer = BiEncoderTrainer(cfg, cfg.column_file_loc, cfg.row_file_loc)
+    trainer = BiEncoderTrainer(cfg)
 
     if cfg.train_datasets and len(cfg.train_datasets) > 0:
         trainer.run_train(run)

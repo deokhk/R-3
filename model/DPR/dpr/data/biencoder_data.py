@@ -204,8 +204,6 @@ class RelationalJsonQADataset(JsonQADataset):
     def __init__(
         self,
         file: str,
-        column_file_loc: str,
-        row_file_loc: str,
         selector: DictConfig = None,
         special_token: str = None,
         encoder_type: str = None,
@@ -223,16 +221,6 @@ class RelationalJsonQADataset(JsonQADataset):
             query_special_suffix=query_special_suffix
         )
 
-        with open(column_file_loc,"rb") as fr:
-            column_embedding_list = pickle.load(fr)
-
-        with open(row_file_loc,"rb") as fr:
-            row_embedding_list = pickle.load(fr)
-
-        self.column_embedding_list = column_embedding_list
-        self.row_embedding_list = row_embedding_list
-
-        logger.info("Loaded column, row embedding files")
 
     def __getitem__(self, index) -> RelationalBiEncoderSample:
         json_sample = self.data[index]
@@ -248,23 +236,21 @@ class RelationalJsonQADataset(JsonQADataset):
                 ctx["title"] = None
 
         def create_passage(ctx: dict):
-            
-            if int(ctx["passage_id"]) >= 21015325:
-                # table passage. padding will be done later, according to text_to_tensor
+            if "column_id" in ctx:
                 return RelationalBiEncoderPassage(
                     normalize_passage(ctx["text"]) if self.normalize else ctx["text"],
                     ctx["title"],
-                    self.column_embedding_list[int(ctx["passage_id"]) - 21015325],
-                    self.row_embedding_list[int(ctx["passage_id"]) - 21015325],
+                    ctx["column_id"],
+                    ctx["row_id"]
                 )
             else:
-                # plain passage. padding will be done later, according to text_to_tensor
                 return RelationalBiEncoderPassage(
                     normalize_passage(ctx["text"]) if self.normalize else ctx["text"],
                     ctx["title"],
                     None,
-                    None,
+                    None
                 )
+
 
         r.positive_passages = [create_passage(ctx) for ctx in positive_ctxs]
         r.negative_passages = [create_passage(ctx) for ctx in negative_ctxs]
