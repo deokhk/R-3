@@ -14,6 +14,7 @@ import math
 import os
 import pathlib
 import pickle
+import ast
 from typing import List, Tuple
 
 import hydra
@@ -69,22 +70,24 @@ def gen_ctx_vectors(
             if ctx.column_ids is None:
                 ctx_column_ids.append(torch.zeros(max_length, dtype=torch.int64))
             else:
-                if len(ctx.column_ids) >= max_length:
-                    truncated_column_id = ctx.column_ids[0:max_length-1] + [0] # We append "[SEP]" token to input ids when the ids exceeds maximum length.
+                column_list_data = ast.literal_eval(ctx.column_ids)
+                if len(column_list_data) >= max_length:
+                    truncated_column_id = column_list_data[0:max_length-1] + [0] # We append "[SEP]" token to input ids when the ids exceeds maximum length.
                     ctx_column_ids.append(torch.tensor(truncated_column_id, dtype=torch.int64))
                 else:
-                    ctx_column_ids.append(torch.tensor(ctx.column_ids + [0 for _ in range(max_length - len(ctx.column_ids))], dtype=torch.int64))
+                    ctx_column_ids.append(torch.tensor(column_list_data + [0 for _ in range(max_length - len(column_list_data))], dtype=torch.int64))
         
         for ctx in batch:
             ctx = ctx[1]
             if ctx.row_ids is None:
                 ctx_row_ids.append(torch.zeros(max_length, dtype=torch.int64))
             else:
-                if len(ctx.row_ids) >= max_length:
-                    truncated_row_id = ctx.row_ids[0:max_length-1] + [0] # We append "[SEP]" token to input ids when the ids exceeds maximum length.
+                row_list_data = ast.literal_eval(ctx.row_ids)
+                if len(row_list_data) >= max_length:
+                    truncated_row_id = row_list_data[0:max_length-1] + [0] # We append "[SEP]" token to input ids when the ids exceeds maximum length.
                     ctx_row_ids.append(torch.tensor(truncated_row_id, dtype=torch.int64))
                 else:
-                    ctx_row_ids.append(torch.tensor(ctx.row_ids + [0 for _ in range(max_length - len(ctx.row_ids))], dtype=torch.int64))
+                    ctx_row_ids.append(torch.tensor(row_list_data + [0 for _ in range(max_length - len(row_list_data))], dtype=torch.int64))
         
         ctx_column_ids_batch = move_to_device(torch.stack(ctx_column_ids, dim=0), cfg.device)
         ctx_row_ids_batch = move_to_device(torch.stack(ctx_row_ids, dim=0), cfg.device)

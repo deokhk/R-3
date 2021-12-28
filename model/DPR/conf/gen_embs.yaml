@@ -24,7 +24,7 @@ shard_id: 0
 num_shards: 1
 
 # Batch size for the passage encoder forward pass (works in DataParallel mode)
-batch_size: 2048
+batch_size: 4096
 
 tables_as_passages: False
 
