@@ -23,7 +23,7 @@ import src.data
 import src.model
 
 
-@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
+@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
 def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, rank, collator, best_dev_em, checkpoint_path, logger, tokenizer, run=None):
     torch.manual_seed(0) #different seed for different sampling depending on global_rank
     train_sampler = DistributedSampler(
@@ -191,7 +191,6 @@ def main_loop(gpu, opt):
             t5 = transformers.T5ForConditionalGeneration.from_pretrained(model_name)
             model = src.model.FiDT5(t5.config)
             model.load_t5(t5.state_dict())
-            model = model.to(opt.local_rank)
             optimizer, scheduler = src.util.set_optim(opt, model)
             step, best_dev_em = 0, 0.0
         elif opt.model_path == "none":
@@ -203,6 +202,10 @@ def main_loop(gpu, opt):
             model, optimizer, scheduler, opt_checkpoint, step, best_dev_em = \
                 src.util.load(model_class, opt.model_path, opt, reset_params=True)
             logger.info(f"Model loaded from {opt.model_path}")
+        if opt.is_distributed:
+            model = model.to(gpu)
+        logger.info(f"Training from scratch")
+
     
     model.set_checkpoint(opt.use_checkpoint)
 

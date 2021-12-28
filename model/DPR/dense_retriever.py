@@ -39,6 +39,7 @@ from dpr.utils.model_utils import (
     get_model_obj,
     load_states_from_checkpoint,
 )
+from dpr.models.relational_biencoder import RelationalBiEncoder
 
 logger = logging.getLogger()
 setup_logger(logger)
@@ -79,7 +80,7 @@ def generate_question_vectors(
             if selector:
                 rep_positions = selector.get_positions(q_ids_batch, tensorizer)
 
-                _, out, _ = BiEncoder.get_representation(
+                _, out, _ = RelationalBiEncoder.get_q_representation(
                     question_encoder,
                     q_ids_batch,
                     q_seg_batch,

@@ -57,7 +57,7 @@ def gen_table_passages(table, tokenizer):
     return (linearized_column, psg_list)
 
 # TODO: make sure to remove webhook when this releases publicly.
-@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
+@slack_sender(webhook_url="https://hooks.slack.com/services/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", channel="knock_knock")
 def main():
     print("Now generating table passages.")    
     tokenizer = BertTokenizerFast.from_pretrained("bert-base-cased", additional_special_tokens = ['[C_SEP]', '[V_SEP]', '[R_SEP]'])
