@@ -23,7 +23,7 @@ from knockknock import slack_sender
 from omegaconf import DictConfig, OmegaConf
 from torch import nn
 
-from dpr.data.biencoder_data import BiEncoderPassage
+from dpr.data.biencoder_data import BiEncoderPassage, RelationalBiEncoderPassage
 from dpr.models import init_biencoder_components
 from dpr.options import set_cfg_params_from_state, setup_cfg_gpu, setup_logger
 
@@ -41,7 +41,7 @@ setup_logger(logger)
 
 def gen_ctx_vectors(
     cfg: DictConfig,
-    ctx_rows: List[Tuple[object, BiEncoderPassage]],
+    ctx_rows: List[Tuple[object, RelationalBiEncoderPassage]],
     model: nn.Module,
     tensorizer: Tensorizer,
     insert_title: bool = True,
@@ -59,8 +59,38 @@ def gen_ctx_vectors(
         ctx_ids_batch = move_to_device(torch.stack(batch_token_tensors, dim=0), cfg.device)
         ctx_seg_batch = move_to_device(torch.zeros_like(ctx_ids_batch), cfg.device)
         ctx_attn_mask = move_to_device(tensorizer.get_attn_mask(ctx_ids_batch), cfg.device)
+
+        ctx_column_ids = []
+        ctx_row_ids = []
+        max_length = len(ctx_ids_batch[0])
+
+        for ctx in batch:
+            ctx = ctx[1]
+            if ctx.column_ids is None:
+                ctx_column_ids.append(torch.zeros(max_length, dtype=torch.int64))
+            else:
+                if len(ctx.column_ids) >= max_length:
+                    truncated_column_id = ctx.column_ids[0:max_length-1] + [0] # We append "[SEP]" token to input ids when the ids exceeds maximum length.
+                    ctx_column_ids.append(torch.tensor(truncated_column_id, dtype=torch.int64))
+                else:
+                    ctx_column_ids.append(torch.tensor(ctx.column_ids + [0 for _ in range(max_length - len(ctx.column_ids))], dtype=torch.int64))
+        
+        for ctx in batch:
+            ctx = ctx[1]
+            if ctx.row_ids is None:
+                ctx_row_ids.append(torch.zeros(max_length, dtype=torch.int64))
+            else:
+                if len(ctx.row_ids) >= max_length:
+                    truncated_row_id = ctx.row_ids[0:max_length-1] + [0] # We append "[SEP]" token to input ids when the ids exceeds maximum length.
+                    ctx_row_ids.append(torch.tensor(truncated_row_id, dtype=torch.int64))
+                else:
+                    ctx_row_ids.append(torch.tensor(ctx.row_ids + [0 for _ in range(max_length - len(ctx.row_ids))], dtype=torch.int64))
+        
+        ctx_column_ids_batch = move_to_device(torch.stack(ctx_column_ids, dim=0), cfg.device)
+        ctx_row_ids_batch = move_to_device(torch.stack(ctx_row_ids, dim=0), cfg.device)
+
         with torch.no_grad():
-            _, out, _ = model(ctx_ids_batch, ctx_seg_batch, ctx_attn_mask)
+            _, out, _ = model(ctx_ids_batch, ctx_seg_batch, ctx_attn_mask, ctx_column_ids_batch, ctx_row_ids_batch)
         out = out.cpu()
 
         ctx_ids = [r[0] for r in batch]
@@ -95,7 +125,7 @@ def main(cfg: DictConfig):
 
     logger.info("CFG:")
     logger.info("%s", OmegaConf.to_yaml(cfg))
-
+    
     tensorizer, encoder, _ = init_biencoder_components(cfg.encoder.encoder_model_type,  cfg, inference_only=True)
 
     encoder = encoder.ctx_model if cfg.encoder_type == "ctx" else encoder.question_model

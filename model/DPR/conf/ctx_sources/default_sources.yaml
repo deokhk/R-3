@@ -9,3 +9,8 @@ dpr_wiki_with_table:
   _target_: dpr.data.retriever_data.CsvCtxSrc
   file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/psg_table_w100_without_special_token.tsv"
   id_prefix: 'wiki_with_table:'
+
+dpr_wiki_with_table_col_row:
+  _target_: dpr.data.retriever_data.RelationalCsvCtxSrc
+  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/psg_table_w100_without_special_token.tsv"
+  id_prefix: 'wiki_with_table_ret:'

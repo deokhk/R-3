@@ -50,5 +50,3 @@ fp16: False
 # For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
 #        "See details at https://nvidia.github.io/apex/amp.html
 fp16_opt_level: O1
-
-use_relational_embedding: False

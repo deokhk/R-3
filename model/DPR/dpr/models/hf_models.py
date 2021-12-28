@@ -54,7 +54,7 @@ def get_relational_bert_biencoder_components(cfg, inference_only: bool = False, 
             learning_rate=cfg.train.learning_rate,
             adam_eps=cfg.train.adam_eps,
             weight_decay=cfg.train.weight_decay,
-            use_relational_embedding=True,
+            use_relational_embedding=False,
         )
         if not inference_only
         else None

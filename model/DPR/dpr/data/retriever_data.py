@@ -12,6 +12,7 @@ from omegaconf import DictConfig
 
 from dpr.data.biencoder_data import (
     BiEncoderPassage,
+    RelationalBiEncoderPassage,
     normalize_passage,
     normalize_question,
     get_dpr_files,
@@ -254,6 +255,43 @@ class CsvCtxSrc(RetrieverData):
                     passage = normalize_passage(passage)
                 ctxs[sample_id] = BiEncoderPassage(passage, row[self.title_col])
 
+
+class RelationalCsvCtxSrc(RetrieverData):
+    def __init__(
+        self,
+        file: str,
+        id_col: int = 0,
+        text_col: int = 1,
+        title_col: int = 2,
+        column_ids_col: int = 3,
+        row_ids_col: int=4,
+        id_prefix: str = None,
+        normalize: bool = False,
+    ):
+        super().__init__(file)
+        self.text_col = text_col
+        self.title_col = title_col
+        self.id_col = id_col
+        self.column_ids_col = column_ids_col
+        self.row_ids_col = row_ids_col
+        self.id_prefix = id_prefix
+        self.normalize = normalize
+
+    def load_data_to(self, ctxs: Dict[object, RelationalBiEncoderPassage]):
+        super().load_data()
+        with open(self.file) as ifile:
+            reader = csv.reader(ifile, delimiter="\t")
+            for row in reader:
+                if row[self.id_col] == "id":
+                    continue
+                if self.id_prefix:
+                    sample_id = self.id_prefix + str(row[self.id_col])
+                else:
+                    sample_id = row[self.id_col]
+                passage = row[self.text_col]
+                if self.normalize:
+                    passage = normalize_passage(passage)
+                ctxs[sample_id] = RelationalBiEncoderPassage(passage, row[self.title_col], row[self.column_ids_col], row[self.row_ids_col])
 
 class KiltCsvCtxSrc(CsvCtxSrc):
     def __init__(
