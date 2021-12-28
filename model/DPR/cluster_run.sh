@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -J gen_emb_prop_sc # job name
+#SBATCH -J gen_emb_prop_chkpt # job name
 #SBATCH -o sbatch_output_log/output_%x_%j.out # standard output and error log
 #SBATCH -p A100-80GB # queue name or partiton name
 #SBATCH -t 72:00:00 # Run time (hh:mm:ss)
@@ -18,6 +18,6 @@ module purge
 
 date
 
-sh gen_embedding_and_train_data_scratch.sh
+sh gen_embedding_and_train_data_chkpt.sh
 
 date

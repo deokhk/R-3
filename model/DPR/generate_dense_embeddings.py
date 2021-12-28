@@ -67,7 +67,7 @@ def gen_ctx_vectors(
 
         for ctx in batch:
             ctx = ctx[1]
-            if ctx.column_ids is None:
+            if ctx.column_ids == "":
                 ctx_column_ids.append(torch.zeros(max_length, dtype=torch.int64))
             else:
                 column_list_data = ast.literal_eval(ctx.column_ids)
@@ -79,7 +79,7 @@ def gen_ctx_vectors(
         
         for ctx in batch:
             ctx = ctx[1]
-            if ctx.row_ids is None:
+            if ctx.row_ids == "":
                 ctx_row_ids.append(torch.zeros(max_length, dtype=torch.int64))
             else:
                 row_list_data = ast.literal_eval(ctx.row_ids)
