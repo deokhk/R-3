@@ -23,21 +23,25 @@ def main(args, logger):
     for qapair in train:
         pos = qapair["positive_ctxs"]
         neg = qapair["hard_negative_ctxs"]
-        for psg in pos:
-            if int(psg["passage_id"]) >= 21015325:
-                psg["column_id"] = column[int(psg["passage_id"]) - 21015325]
-                psg["row_id"] = row[int(psg["passage_id"]) - 21015325]
-            else:
-                psg["column_id"] = None
-                psg["row_id"] = None
-        for psg in neg:
-            if int(psg["passage_id"]) >= 21015325:
-                psg["column_id"] = column[int(psg["passage_id"]) - 21015325]
-                psg["row_id"] = row[int(psg["passage_id"]) - 21015325]
-            else:
-                psg["column_id"] = None
-                psg["row_id"] = None
-    with open(args.out_dir + "nq-rel-augmented-train.json" , 'w') as f:
+        try:
+            for psg in pos:
+                if int(psg["passage_id"]) >= 21015325:
+                        psg["column_id"] = column[int(psg["passage_id"]) - 21015325]
+                        psg["row_id"] = row[int(psg["passage_id"]) - 21015325]
+                else:
+                        psg["column_id"] = None
+                        psg["row_id"] = None
+            for psg in neg:
+                if int(psg["passage_id"]) >= 21015325:
+                    psg["column_id"] = column[int(psg["passage_id"]) - 21015325]
+                    psg["row_id"] = row[int(psg["passage_id"]) - 21015325]
+                else:
+                    psg["column_id"] = None
+                    psg["row_id"] = None
+        except:
+            import pdb
+            pdb.set_trace()
+    with open(args.out_dir + args.rel_train_file_name , 'w') as f:
         json.dump(train, f)
 
     logger.info("Generated augmented train dataset.")
@@ -45,21 +49,25 @@ def main(args, logger):
     for qapair in dev:
         pos = qapair["positive_ctxs"]
         neg = qapair["hard_negative_ctxs"]
-        for psg in pos:
-            if int(psg["passage_id"]) >= 21015325:
-                psg["column_id"] = column[int(psg["passage_id"]) - 21015325]
-                psg["row_id"] = row[int(psg["passage_id"]) - 21015325]
-            else:
-                psg["column_id"] = None
-                psg["row_id"] = None
-        for psg in neg:
-            if int(psg["passage_id"]) >= 21015325:
-                psg["column_id"] = column[int(psg["passage_id"]) - 21015325]
-                psg["row_id"] = row[int(psg["passage_id"]) - 21015325]
-            else:
-                psg["column_id"] = None
-                psg["row_id"] = None
-    with open(args.out_dir + "nq-rel-augmented-dev.json" , 'w') as f:
+        try:
+            for psg in pos:
+                if int(psg["passage_id"]) >= 21015325:
+                    psg["column_id"] = column[int(psg["passage_id"]) - 21015325]
+                    psg["row_id"] = row[int(psg["passage_id"]) - 21015325]
+                else:
+                    psg["column_id"] = None
+                    psg["row_id"] = None
+            for psg in neg:
+                if int(psg["passage_id"]) >= 21015325:
+                    psg["column_id"] = column[int(psg["passage_id"]) - 21015325]
+                    psg["row_id"] = row[int(psg["passage_id"]) - 21015325]
+                else:
+                    psg["column_id"] = None
+                    psg["row_id"] = None
+        except:
+            import pdb 
+            pdb.set_trace()
+    with open(args.out_dir + args.rel_dev_file_name , 'w') as f:
         json.dump(dev, f)
 
     logger.info("Generated augmented dev dataset.")
@@ -77,6 +85,9 @@ if __name__ == "__main__":
         default="/home/deokhk/research/MultiQA/model/DPR/row_ids_list_without_special_token.pickle")
     parser.add_argument("--out_dir", help="output path where the augmented encoder train/dev will be saved",
         default="/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/")
+    parser.add_argument("--rel_train_file_name", help="name of the output train file", default="nq-rel-augmented-train.json")
+    parser.add_argument("--rel_dev_file_name", help="name of the output dev file", default="nq-rel-augmented-dev.json")
+
     args = parser.parse_args()
     logger = logging.getLogger()
     setup_logger(logger)
