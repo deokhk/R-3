@@ -25,4 +25,3 @@ val_av_rank_hard_neg: 30
 val_av_rank_other_neg: 30
 val_av_rank_bsz: 128
 val_av_rank_max_qs: 10000
-use_relational_embedding: True

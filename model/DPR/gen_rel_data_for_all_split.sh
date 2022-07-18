@@ -2,8 +2,8 @@
 
 # First, generate nq-rel-augmented-train.json / nq-rel-augmented-dev.json
 python generate_encoder_data_with_col_and_row.py \
---train_path="/home/deokhk/research/MultiQA_data/retriever/plain/nq-train-text-table-without-special.json" \
---dev_path="/home/deokhk/research/MultiQA_data/retriever/plain/nq-dev-text-table-without-special.json" \
+--train_path="/home/deokhk/research/MultiQA_data/retriever/plain/nq-train-text-table_without_special_token.json" \
+--dev_path="/home/deokhk/research/MultiQA_data/retriever/plain/nq-dev-text-table_without_special_token.json" \
 --out_dir="/home/deokhk/research/MultiQA_data/retriever/relative_embedding" \
 --rel_train_file_name="nq-rel-augmented-train.json" \
 --rel_dev_file_name="nq-rel-augmented-dev.json"

@@ -359,8 +359,8 @@ def main():
     merged_interactions = interactions_visualize_and_merge(interaction_loc)
     filtered_interactions = filter_interactions(merged_interactions, filtered_tables)
 
-    dpr_train_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train.json"
-    dpr_dev_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev.json"
+    dpr_train_loc = "/home/deokhk/research/MultiQA_data/retriever/plain/nq-train.json"
+    dpr_dev_loc = "/home/deokhk/research/MultiQA_data/retriever/plain/nq-dev.json"
     nq_open_train_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/qas/nq-train.csv"
     nq_open_dev_loc = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/qas/nq-dev.csv"
     table_train_interactions, table_dev_interactions = generate_table_qa_interactions(filtered_interactions, dpr_train_loc, dpr_dev_loc, nq_open_train_loc, nq_open_dev_loc)

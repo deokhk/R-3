@@ -1,9 +1,8 @@
 #!/bin/bash
 CUDA_VISIBLE_DEVICES=0 python train_dense_encoder.py \
-train="biencoder_baseline_without_special_token" \
-train_datasets=[nq_train_with_table_fin] \
-dev_datasets=[nq_dev_with_table_fin] \
-train="biencoder_baseline_without_special_token" \
-model_file="/home/deokhk/research/MultiQA/model/DPR/dpr/data/downloads/checkpoint/retriever/single-adv-hn/nq/bert-base-encoder.cp" \
-output_dir="/home/deokhk/research/MultiQA/model/DPR/trained_model_checkpoints/best_dpr_chkpt_1215" \
-experiment_name="dpr_chkpt_1215"
+train="biencoder_for_development" \
+train_datasets=[nq_dev_table_only_rel] \
+dev_datasets=[nq_dev_table_only_rel] \
+train="biencoder_for_development" \
+output_dir="/home/deokhk/research/MultiQA/model/DPR/trained_model_checkpoints/test" \
+experiment_name="test"

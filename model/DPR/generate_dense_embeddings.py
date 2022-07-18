@@ -154,7 +154,6 @@ def main(cfg: DictConfig):
         key[prefix_len:]: value for (key, value) in saved_state.model_dict.items() if key.startswith("ctx_model.")
     }
     model_to_load.load_state_dict(ctx_state)
-
     logger.info("reading data source: %s", cfg.ctx_src)
 
     ctx_src = hydra.utils.instantiate(cfg.ctx_sources[cfg.ctx_src])

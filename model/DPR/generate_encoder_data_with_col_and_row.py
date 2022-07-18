@@ -2,6 +2,7 @@ import argparse
 import json
 import pickle
 import logging
+import os
 from dpr.options import setup_logger
 
 
@@ -41,7 +42,7 @@ def main(args, logger):
         except:
             import pdb
             pdb.set_trace()
-    with open(args.out_dir + args.rel_train_file_name , 'w') as f:
+    with open(os.path.join(args.out_dir, args.rel_train_file_name) , 'w') as f:
         json.dump(train, f)
 
     logger.info("Generated augmented train dataset.")
@@ -67,7 +68,7 @@ def main(args, logger):
         except:
             import pdb 
             pdb.set_trace()
-    with open(args.out_dir + args.rel_dev_file_name , 'w') as f:
+    with open(os.path.join(args.out_dir,args.rel_dev_file_name) , 'w') as f:
         json.dump(dev, f)
 
     logger.info("Generated augmented dev dataset.")

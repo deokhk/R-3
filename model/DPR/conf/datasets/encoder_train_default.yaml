@@ -1,16 +1,56 @@
 # @package _group_
 
-nq_train:
+nq_train_only_text:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: data.retriever.nq-train
+  file: "/home/deokhk/research/MultiQA_data/retriever/plain/nq-train-text-without-special.json"
+
+nq_dev_only_text:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: "/home/deokhk/research/MultiQA_data/retriever/plain/nq-dev-text-without-special.json"
+
+nq_train_only_table:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: "/home/deokhk/research/MultiQA_data/retriever/plain/table_train_without_special_token.json"
+
+nq_dev_only_table:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: "/home/deokhk/research/MultiQA_data/retriever/plain/table_dev_without_special_token.json"
 
 nq_train_with_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train-text-table.json"
+  file: "/home/deokhk/research/MultiQA_data/retriever/plain/nq-train-text-table_without_special_token.json"
 
-nq_train_with_table_fin:
+nq_dev_with_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train-text-table-fin.json"
+  file: "/home/deokhk/research/MultiQA_data/retriever/plain/nq-dev-text-table_without_special_token.json"
+
+nq_train_with_table_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
+  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train.json"
+
+nq_dev_with_table_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
+  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev.json"
+
+nq_train_text_only_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
+  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train-text.json"
+
+nq_dev_text_only_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
+  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev-text.json"
+
+nq_train_table_only_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
+  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train-table.json"
+
+nq_dev_table_only_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
+  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev-table.json"
+
+nq_train:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: data.retriever.nq-train
 
 nq_train_hn1:
   _target_: dpr.data.biencoder_data.JsonQADataset
@@ -20,21 +60,6 @@ nq_dev:
   _target_: dpr.data.biencoder_data.JsonQADataset
   file: data.retriever.nq-dev
 
-nq_dev_with_table:
-  _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev-text-table.json"
-
-nq_train_with_table_rel:
-  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-rel-augmented-train.json"
-
-nq_dev_with_table_rel:
-  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-rel-augmented-dev.json"
-
-nq_dev_with_table_fin:
-  _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev-text-table-fin.json"
 
 trivia_train:
   _target_: dpr.data.biencoder_data.JsonQADataset

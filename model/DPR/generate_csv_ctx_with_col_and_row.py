@@ -42,13 +42,13 @@ def main(args, logger):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--context_path", help="path to the csv context file ",
-        default = "/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/psg_table_w100_without_special_token.tsv")
+        default = "/home/deokhk/research/MultiQA_data/wikipedia_split/psg_table_w100_without_special_token.tsv")
     parser.add_argument("--column_file_loc", help="path to column file",
         default="/home/deokhk/research/MultiQA/model/DPR/column_ids_list_without_special_token.pickle")
     parser.add_argument("--row_file_loc", help="path to row file",
         default="/home/deokhk/research/MultiQA/model/DPR/row_ids_list_without_special_token.pickle")
     parser.add_argument("--output_dir", help="output path where the augmented context will be saved",
-        default="/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/")
+        default="/home/deokhk/research/MultiQA_data/wikipedia_split/")
     args = parser.parse_args()
     logger = logging.getLogger()
     setup_logger(logger)

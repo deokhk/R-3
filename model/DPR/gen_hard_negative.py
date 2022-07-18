@@ -34,7 +34,7 @@ def main(args):
 
     es = Elasticsearch(timeout=30, max_retries=10, retry_on_timeout=True)
     passage_loc = args.passage_loc
-    # bulk(es, gen_passages(passage_loc)) # Index table passages. Wait a while till all passages are indexed..
+    bulk(es, gen_passages(passage_loc)) # Index table passages. Wait a while till all passages are indexed..
 
     with open(args.train_table_without_hn, "r") as f:
         train_table_without_hn = json.load(f)
@@ -154,11 +154,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Adds hard negative to table training data.")
-    parser.add_argument('--train_table_without_hn', help='path to input table training data file', default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_train_without_special_token.json')
-    parser.add_argument('--dev_table_without_hn', help='path to input table dev data file', default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/table_dev_without_special_token.json')
-    parser.add_argument('--train_text', help='path to nq-train.json', default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train.json')
-    parser.add_argument('--dev_text', help='path to nq-dev.json', default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev.json')
-    parser.add_argument('--output_path',  default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/', help='path to output directory where augmented training/dev data will be added')
-    parser.add_argument('--passage_loc',  default='/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/wikipedia_split/psg_table_w100_without_special_token.tsv', help='path to the passage file')
+    parser.add_argument('--train_table_without_hn', help='path to input table training data file', default='/home/deokhk/research/MultiQA_data/retriever/plain/table_train_without_special_token.json')
+    parser.add_argument('--dev_table_without_hn', help='path to input table dev data file', default='/home/deokhk/research/MultiQA_data/retriever/plain/table_dev_without_special_token.json')
+    parser.add_argument('--train_text', help='path to nq-train.json', default='/home/deokhk/research/MultiQA_data/retriever/plain/nq-train.json')
+    parser.add_argument('--dev_text', help='path to nq-dev.json', default='/home/deokhk/research/MultiQA_data/retriever/plain/nq-dev.json')
+    parser.add_argument('--output_path',  default='/home/deokhk/research/MultiQA_data/retriever/plain/', help='path to output directory where augmented training/dev data will be added')
+    parser.add_argument('--passage_loc',  default='/home/deokhk/research/MultiQA_data/wikipedia_split/psg_table_w100_without_special_token.tsv', help='path to the passage file')
     args = parser.parse_args()
     main(args)

@@ -1,7 +1,7 @@
 import json 
 
-train_path = "/home/deokhk/research/MultiQA_data/retriever/plain/nq-train-text-table-without-special.json"
-dev_path = "/home/deokhk/research/MultiQA_data/retriever/plain/nq-dev-text-table-without-special.json"
+train_path = "/home/deokhk/research/MultiQA_data/retriever/plain/nq-train-text-table_without_special_token.json"
+dev_path = "/home/deokhk/research/MultiQA_data/retriever/plain/nq-dev-text-table_without_special_token.json"
 
 with open(train_path, 'r') as f:
     train = json.load(f)

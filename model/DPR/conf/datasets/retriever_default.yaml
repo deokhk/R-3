@@ -26,7 +26,15 @@ nq_dev_with_table:
 
 nq_dev_with_table_csv:
   _target_: dpr.data.retriever_data.CsvQASrc
-  file: "/home/deokhk/research/MultiQA/model/DPR/downloads/data/retriever/qas/nq-dev-text-table-without-special.csv"
+  file: "/home/deokhk/research/MultiQA_data/retriever/plain/qas/nq-dev-text-table_without_special_token.csv"
+
+nq_dev_text_csv:
+  _target_: dpr.data.retriever_data.CsvQASrc
+  file: "/home/deokhk/research/MultiQA_data/retriever/plain/qas/nq-dev-text-without-special.csv"
+
+nq_dev_table_csv:
+  _target_: dpr.data.retriever_data.CsvQASrc
+  file: "/home/deokhk/research/MultiQA_data/retriever/plain/qas/table_dev_without_special_token.csv"
 
 trivia_test:
   _target_: dpr.data.retriever_data.CsvQASrc
@@ -47,3 +55,4 @@ webq_test:
 curatedtrec_test:
   _target_: dpr.data.retriever_data.CsvQASrc
   file: data.retriever.qas.curatedtrec-test
+
