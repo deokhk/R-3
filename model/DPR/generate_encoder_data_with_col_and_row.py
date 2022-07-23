@@ -77,15 +77,15 @@ def main(args, logger):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--train_path", help="path to the retrieval json train file", 
-        default="/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train-text-table-fin.json")
+        default="/home1/deokhk_1/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-train-text-table-fin.json")
     parser.add_argument("--dev_path", help="path to the retrieval dev json file",
-        default="/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev-text-table-fin.json")
+        default="/home1/deokhk_1/research/MultiQA/model/DPR/dpr/downloads/data/retriever/nq-dev-text-table-fin.json")
     parser.add_argument("--column_file_loc", help="path to column file",
-        default="/home/deokhk/research/MultiQA/model/DPR/column_ids_list_without_special_token.pickle")
+        default="/home1/deokhk_1/research/MultiQA/model/DPR/column_ids_list_without_special_token.pickle")
     parser.add_argument("--row_file_loc", help="path to row file",
-        default="/home/deokhk/research/MultiQA/model/DPR/row_ids_list_without_special_token.pickle")
+        default="/home1/deokhk_1/research/MultiQA/model/DPR/row_ids_list_without_special_token.pickle")
     parser.add_argument("--out_dir", help="output path where the augmented encoder train/dev will be saved",
-        default="/home/deokhk/research/MultiQA/model/DPR/dpr/downloads/data/retriever/")
+        default="/home1/deokhk_1/research/MultiQA/model/DPR/dpr/downloads/data/retriever/")
     parser.add_argument("--rel_train_file_name", help="name of the output train file", default="nq-rel-augmented-train.json")
     parser.add_argument("--rel_dev_file_name", help="name of the output dev file", default="nq-rel-augmented-dev.json")
 

@@ -2,51 +2,60 @@
 
 nq_train_only_text:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/plain/nq-train-text-without-special.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq-train-text-without-special.json"
 
 nq_dev_only_text:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/plain/nq-dev-text-without-special.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq-dev-text-without-special.json"
 
 nq_train_only_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/plain/table_train_without_special_token.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/table_train_without_special_token.json"
 
 nq_dev_only_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/plain/table_dev_without_special_token.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/table_dev_without_special_token.json"
 
 nq_train_with_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/plain/nq-train-text-table_without_special_token.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq-train-text-table_without_special_token.json"
 
 nq_dev_with_table:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/plain/nq-dev-text-table_without_special_token.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq-dev-text-table_without_special_token.json"
 
 nq_train_with_table_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train.json"
 
 nq_dev_with_table_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev.json"
 
 nq_train_text_only_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train-text.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train-text.json"
 
 nq_dev_text_only_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev-text.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev-text.json"
 
 nq_train_table_only_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train-table.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train-table.json"
 
 nq_dev_table_only_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home/deokhk/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev-table.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev-table.json"
+
+nq_train_with_table_upsampled_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_train_with_table_rel_upsampled.json"
+
+nq_train_table_only_upsampled_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_train_table_only_rel_upsampled.json"
+
 
 nq_train:
   _target_: dpr.data.biencoder_data.JsonQADataset
