@@ -19,7 +19,7 @@ from dpr.utils.data_utils import read_data_from_json_files, Tensorizer
 
 logger = logging.getLogger(__name__)
 BiEncoderPassage = collections.namedtuple("BiEncoderPassage", ["text", "title"])
-RelationalBiEncoderPassage = collections.namedtuple("RelationalBiencoderPassage", ["text", "title", "column_ids", "row_ids"])
+RelationalBiEncoderPassage = collections.namedtuple("RelationalBiencoderPassage", ["text", "title", "column_ids"])
 
 class BiEncoderSample(object):
     query: str
@@ -240,14 +240,12 @@ class RelationalJsonQADataset(JsonQADataset):
                 return RelationalBiEncoderPassage(
                     normalize_passage(ctx["text"]) if self.normalize else ctx["text"],
                     ctx["title"],
-                    ctx["column_id"],
-                    ctx["row_id"]
+                    ctx["column_id"]
                 )
             else:
                 return RelationalBiEncoderPassage(
                     normalize_passage(ctx["text"]) if self.normalize else ctx["text"],
                     ctx["title"],
-                    None,
                     None
                 )
 

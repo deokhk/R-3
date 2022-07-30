@@ -105,7 +105,6 @@ class BiEncoderTrainer(object):
         if saved_state:
             augmented_state = saved_state
             augmented_state.model_dict["ctx_model.embeddings.column_embeddings.weight"] = torch.randn([51,768])
-            augmented_state.model_dict["ctx_model.embeddings.row_embeddings.weight"] = torch.randn([101,768])
             self._load_saved_state(augmented_state)
 
 
@@ -358,7 +357,6 @@ class BiEncoderTrainer(object):
             ctxs_ids = biencoder_input.context_ids
             ctxs_segments = biencoder_input.ctx_segments
             ctxs_column_ids = biencoder_input.ctx_column_ids
-            ctxs_row_ids = biencoder_input.ctx_row_ids
             bsz = ctxs_ids.size(0)
             
             # get the token to be used for representation selection
@@ -381,7 +379,6 @@ class BiEncoderTrainer(object):
                 ctx_ids_batch = ctxs_ids[batch_start : batch_start + sub_batch_size]
                 ctx_seg_batch = ctxs_segments[batch_start : batch_start + sub_batch_size]
                 ctx_column_batch = ctxs_column_ids[batch_start : batch_start + sub_batch_size]
-                ctx_row_batch = ctxs_row_ids[batch_start : batch_start + sub_batch_size]
 
                 q_attn_mask = self.tensorizer.get_attn_mask(q_ids)
                 ctx_attn_mask = self.tensorizer.get_attn_mask(ctx_ids_batch)
@@ -394,7 +391,6 @@ class BiEncoderTrainer(object):
                         ctx_seg_batch,
                         ctx_attn_mask,
                         ctx_column_batch,
-                        ctx_row_batch,
                         encoder_type=encoder_type,
                         representation_token_pos=rep_positions,
                     )
@@ -780,7 +776,6 @@ def _do_relational_biencoder_fwd_pass(
             input.ctx_segments,
             ctx_attn_mask,
             input.ctx_column_ids,
-            input.ctx_row_ids,
             encoder_type=encoder_type,
             representation_token_pos=rep_positions,
         )
@@ -794,7 +789,6 @@ def _do_relational_biencoder_fwd_pass(
                 input.ctx_segments,
                 ctx_attn_mask,
                 input.ctx_column_ids,
-                input.ctx_row_ids,
                 encoder_type=encoder_type,
                 representation_token_pos=rep_positions,
             )

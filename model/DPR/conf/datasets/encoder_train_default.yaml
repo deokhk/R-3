@@ -1,61 +1,81 @@
 # @package _group_
 
+# Datasets for plain DPR model
 nq_train_only_text:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq-train-text-without-special.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq_train_text.json"
 
 nq_dev_only_text:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq-dev-text-without-special.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq_val_text.json"
 
-nq_train_only_table:
+nq_test_only_text:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/table_train_without_special_token.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq_test_text.json"
 
-nq_dev_only_table:
+nq_train_only_table_upsampled:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/table_dev_without_special_token.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq_train_table_upsampled.json"
 
-nq_train_with_table:
+nq_dev_only_table_upsampled:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq-train-text-table_without_special_token.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq_val_table_upsampled.json"
 
-nq_dev_with_table:
+nq_test_only_table_upsampled:
   _target_: dpr.data.biencoder_data.JsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq-dev-text-table_without_special_token.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq_test_table_upsampled.json"
 
-nq_train_with_table_rel:
+nq_train_total:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq_train_total.json"
+
+nq_dev_total:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq_val_total.json"
+
+nq_test_total:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/nq_test_total.json"
+
+
+# Datasets for relational DPR model
+nq_train_only_text_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_train_rel_text.json"
 
-nq_dev_with_table_rel:
+nq_dev_only_text_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_val_rel_text.json"
 
-nq_train_text_only_rel:
+nq_test_only_text_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train-text.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_test_rel_text.json"
 
-nq_dev_text_only_rel:
+nq_train_only_table_upsampled_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev-text.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_train_rel_table_upsampled.json"
 
-nq_train_table_only_rel:
+nq_dev_only_table_upsampled_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-train-table.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_val_rel_table_upsampled.json"
 
-nq_dev_table_only_rel:
+nq_test_only_table_upsampled_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq-rel-augmented-dev-table.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_test_rel_table_upsampled.json"
 
-nq_train_with_table_upsampled_rel:
+nq_train_total_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_train_with_table_rel_upsampled.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_train_rel_total.json"
 
-nq_train_table_only_upsampled_rel:
+nq_dev_total_rel:
   _target_: dpr.data.biencoder_data.RelationalJsonQADataset
-  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_train_table_only_rel_upsampled.json"
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_val_rel_total.json"
 
+nq_test_total_rel:
+  _target_: dpr.data.biencoder_data.RelationalJsonQADataset
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/relative_embedding/nq_test_rel_total.json"
+
+# Legacy NQ datasets
 
 nq_train:
   _target_: dpr.data.biencoder_data.JsonQADataset

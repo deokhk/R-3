@@ -62,7 +62,6 @@ def gen_ctx_vectors(
         ctx_attn_mask = move_to_device(tensorizer.get_attn_mask(ctx_ids_batch), cfg.device)
 
         ctx_column_ids = []
-        ctx_row_ids = []
         max_length = len(ctx_ids_batch[0])
 
         for ctx in batch:
@@ -77,23 +76,11 @@ def gen_ctx_vectors(
                 else:
                     ctx_column_ids.append(torch.tensor(column_list_data + [0 for _ in range(max_length - len(column_list_data))], dtype=torch.int64))
         
-        for ctx in batch:
-            ctx = ctx[1]
-            if ctx.row_ids == "":
-                ctx_row_ids.append(torch.zeros(max_length, dtype=torch.int64))
-            else:
-                row_list_data = ast.literal_eval(ctx.row_ids)
-                if len(row_list_data) >= max_length:
-                    truncated_row_id = row_list_data[0:max_length-1] + [0] # We append "[SEP]" token to input ids when the ids exceeds maximum length.
-                    ctx_row_ids.append(torch.tensor(truncated_row_id, dtype=torch.int64))
-                else:
-                    ctx_row_ids.append(torch.tensor(row_list_data + [0 for _ in range(max_length - len(row_list_data))], dtype=torch.int64))
         
         ctx_column_ids_batch = move_to_device(torch.stack(ctx_column_ids, dim=0), cfg.device)
-        ctx_row_ids_batch = move_to_device(torch.stack(ctx_row_ids, dim=0), cfg.device)
 
         with torch.no_grad():
-            _, out, _ = model(ctx_ids_batch, ctx_seg_batch, ctx_attn_mask, ctx_column_ids_batch, ctx_row_ids_batch)
+            _, out, _ = model(ctx_ids_batch, ctx_seg_batch, ctx_attn_mask, ctx_column_ids_batch)
         out = out.cpu()
 
         ctx_ids = [r[0] for r in batch]

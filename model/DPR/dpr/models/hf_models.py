@@ -241,7 +241,6 @@ class RelationalBertEmbeddings(nn.Module):
         self.position_embeddings = nn.Embedding(config.max_position_embeddings, config.hidden_size)
         self.token_type_embeddings = nn.Embedding(config.type_vocab_size, config.hidden_size)
         self.column_embeddings = nn.Embedding(51, config.hidden_size) # We filter tables with header_num > 50. Thus we have at most 50 columns + 1 embedding for plain text.
-        self.row_embeddings = nn.Embedding(101, config.hidden_size) # We filter tables with row_number > 100. Thus we have at most 100 rows + 1 embedding for plain text.
 
         # self.LayerNorm is not snake-cased to stick with TensorFlow model variable name and be able to load
         # any TensorFlow checkpoint file
@@ -268,8 +267,7 @@ class RelationalBertEmbeddings(nn.Module):
         position_embeddings = self.position_embeddings(position_ids)
         token_type_embeddings = self.token_type_embeddings(token_type_ids)
         column_embeddings = self.column_embeddings(column_ids)
-        row_embeddings = self.row_embeddings(row_ids)
-        embeddings = inputs_embeds + position_embeddings + token_type_embeddings + column_embeddings + row_embeddings
+        embeddings = inputs_embeds + position_embeddings + token_type_embeddings + column_embeddings 
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
         return embeddings
@@ -289,7 +287,6 @@ class RelationalBertModel(BertModel):
         token_type_ids=None,
         position_ids=None,
         column_ids=None,
-        row_ids=None,
         head_mask=None,
         inputs_embeds=None,
         encoder_hidden_states=None,
@@ -345,7 +342,6 @@ class RelationalBertModel(BertModel):
             position_ids=position_ids, 
             token_type_ids=token_type_ids, 
             column_ids=column_ids, 
-            row_ids=row_ids,
             inputs_embeds=inputs_embeds
         )
         encoder_outputs = self.encoder(
@@ -393,7 +389,6 @@ class RelationalHFBertEncoder(RelationalBertModel):
         token_type_ids: T,
         attention_mask: T,
         column_ids: T,
-        row_ids: T,
         representation_token_pos=0,
     ) -> Tuple[T, ...]:
         if self.config.output_hidden_states:
@@ -401,8 +396,7 @@ class RelationalHFBertEncoder(RelationalBertModel):
                 input_ids=input_ids,
                 token_type_ids=token_type_ids,
                 attention_mask=attention_mask,
-                column_ids=column_ids,
-                row_ids=row_ids
+                column_ids=column_ids
             )
         else:
             hidden_states = None
@@ -410,8 +404,7 @@ class RelationalHFBertEncoder(RelationalBertModel):
                 input_ids=input_ids,
                 token_type_ids=token_type_ids,
                 attention_mask=attention_mask,
-                column_ids=column_ids,
-                row_ids=row_ids
+                column_ids=column_ids
             )
 
         if isinstance(representation_token_pos, int):

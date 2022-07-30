@@ -264,7 +264,6 @@ class RelationalCsvCtxSrc(RetrieverData):
         text_col: int = 1,
         title_col: int = 2,
         column_ids_col: int = 3,
-        row_ids_col: int=4,
         id_prefix: str = None,
         normalize: bool = False,
     ):
@@ -273,7 +272,6 @@ class RelationalCsvCtxSrc(RetrieverData):
         self.title_col = title_col
         self.id_col = id_col
         self.column_ids_col = column_ids_col
-        self.row_ids_col = row_ids_col
         self.id_prefix = id_prefix
         self.normalize = normalize
 
@@ -291,7 +289,7 @@ class RelationalCsvCtxSrc(RetrieverData):
                 passage = row[self.text_col]
                 if self.normalize:
                     passage = normalize_passage(passage)
-                ctxs[sample_id] = RelationalBiEncoderPassage(passage, row[self.title_col], row[self.column_ids_col], row[self.row_ids_col])
+                ctxs[sample_id] = RelationalBiEncoderPassage(passage, row[self.title_col], row[self.column_ids_col])
 
 class KiltCsvCtxSrc(CsvCtxSrc):
     def __init__(
