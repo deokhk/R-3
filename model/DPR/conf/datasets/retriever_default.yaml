@@ -1,5 +1,19 @@
 # @package _group_
 
+# CSV file for testing
+nq_test_text:
+  _target_: dpr.data.retriever_data.CsvQASrc
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/qas/nq_test_text.csv"
+
+nq_test_table:
+  _target_: dpr.data.retriever_data.CsvQASrc
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/qas/nq_test_table_upsampled.json.csv"
+
+nq_test_total:
+  _target_: dpr.data.retriever_data.CsvQASrc
+  file: "/home1/deokhk_1/research/MultiQA_data/retriever/plain/qas/nq_test_total.csv"
+
+
 nq_test:
   _target_: dpr.data.retriever_data.CsvQASrc
   file: data.retriever.qas.nq-test
